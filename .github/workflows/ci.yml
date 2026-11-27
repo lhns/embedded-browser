@@ -132,7 +132,7 @@ jobs:
         run: |
           mkdir -p ~/eb-cache/registry ~/eb-cache/target
           docker run --rm -v "$PWD:/repo" -v ~/eb-cache/registry:/opt/rust/cargo/registry \
-            -v ~/eb-cache/target:/tmp/eb-target -e OUT_DIR=/repo/out eb-p4-build:ci \
+            -v ~/eb-cache/target:/tmp/eb-target -e OUT_DIR=/repo/out -e FEATURES=measured-set eb-p4-build:ci \
             bash /repo/scripts/build-firmware.sh
           sudo chown -R "$(id -u):$(id -g)" out ~/eb-cache
       - run: scripts/size-gate.sh p4-function-ev out/p4-function-ev-esp32p4/app.bin
