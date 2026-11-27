@@ -89,7 +89,7 @@ Owner calls are the purple shape. A decided owner call is drawn; an open one is 
 ## Ratings
 
 <!-- BEGIN GENERATED: ratings -->
-No node carries a rating yet.
+5 of 5 rated nodes are confirmed by the owner.
 <!-- END GENERATED: ratings -->
 
 ## Overview
@@ -217,17 +217,17 @@ Generated on 2026-11-27.
 <!-- BEGIN GENERATED: done-by-month -->
 <details><summary><b>Nov 2026</b>: 13 done</summary>
 
-- `ci-emulation-check`: Check ESP32 emulation options (✔ done · unrated). See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3.
+- `ci-emulation-check`: Check ESP32 emulation options (✔ done · mixed). See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3.
 - `ci-workspace-skeleton`: Workspace skeleton (✔ done · unrated). Empty Cargo workspace, ADRs 0001-0006, this roadmap and a first CI workflow.
 - `doc-corpus-choice`: Choose the test page corpus (✔ done · n/a). Test pages are Home Assistant-like, server-rendered sites and a simple custom dashboard.
 - `doc-name-embedded-browser`: Name the project (✔ done · n/a). The owner chose the name embedded-browser.
 - `doc-public-repo`: Make the repository public (✔ done · n/a). The repository is public under MIT OR Apache-2.0, so test pages must be safe to publish.
-- `eng-blitz-builds-esp`: Blitz builds for ESP32 targets (✔ done · unrated). Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads.
+- `eng-blitz-builds-esp`: Blitz builds for ESP32 targets (✔ done · mixed). Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads.
 - `eng-m0-go-no-go`: M0 go or no-go (✔ done · n/a). The owner chose go with Blitz: it builds for the P4 with two shallow shims, the image is 6.3 MiB and peak heap is at most 10.5 MB.
-- `eng-peak-heap`: Measure peak heap by category (✔ done · unrated). Measure how much memory the engine needs for each corpus page, split by what uses it.
-- `eng-raster-estimate`: Estimate raster speed (✔ done · unrated). Time the two software rasterizers on the host to guess how fast the P4 will draw.
+- `eng-peak-heap`: Measure peak heap by category (✔ done · successful). Measure how much memory the engine needs for each corpus page, split by what uses it.
+- `eng-raster-estimate`: Estimate raster speed (✔ done · mixed). Time the two software rasterizers on the host to guess how fast the P4 will draw.
 - `eng-std-only-esp-idf`: Target ESP-IDF std only (✔ done · n/a). All Servo parts need std, so the engine runs on ESP-IDF std boards only; no_std chips are out.
-- `js-host-spike`: Run corpus scripts in QuickJS (✔ done · unrated). On the host, run the small corpus scripts in QuickJS-ng to learn how much memory and which web APIs they need.
+- `js-host-spike`: Run corpus scripts in QuickJS (✔ done · mixed). On the host, run the small corpus scripts in QuickJS-ng to learn how much memory and which web APIs they need.
 - `js-no-js-in-v1`: No JavaScript in v1 (✔ done · n/a). Version 1 renders pages without running scripts; JavaScript is a parallel track.
 - `plat-boards-p4-first`: ESP32-P4 first, then S3 (✔ done · n/a). The ESP32-P4 boards come first, then the two ESP32-S3 boards.
 
