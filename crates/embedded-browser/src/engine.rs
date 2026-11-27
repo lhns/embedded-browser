@@ -439,6 +439,8 @@ impl Engine {
                 r,
             );
             if let Err(e) = sink(r, &self.px) {
+                // The target is now partly stale; redraw everything next time.
+                self.full = true;
                 result = Err(e);
                 break;
             }

@@ -14,8 +14,8 @@ use embedded_browser::{Browser, Config, FileNet};
 
 const W: usize = 1024;
 const H: usize = 600;
-/// Per-channel delta (8-bit) still counted as equal: one RGB565 step is 8 for red/blue.
-const CHANNEL_TOLERANCE: u8 = 8;
+/// Per-channel delta (8-bit) still counted as equal: one RGB565 step expands to 8 or 9.
+const CHANNEL_TOLERANCE: u8 = 9;
 /// Share of pixels allowed past the channel tolerance.
 const PIXEL_BUDGET: f64 = 0.002;
 
