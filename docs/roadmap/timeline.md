@@ -13,6 +13,7 @@ gantt
     axisFormat %Y-%m-%d
     section eng - engine
     Target ESP-IDF std only :eng_std_only_esp_idf, 2026-11-27, 2026-11-27
+    Blitz builds for ESP32 targets :eng_blitz_builds_esp, 2026-11-27, 2026-11-27
     Measure peak heap by category :eng_peak_heap, 2026-11-27, 2026-11-27
     Estimate raster speed :eng_raster_estimate, 2026-11-27, 2026-11-27
     section plat - platform
@@ -29,5 +30,5 @@ gantt
     Choose the test page corpus :doc_corpus_choice, 2026-11-27, 2026-11-27
 ```
 
-Not shown (no `start`): `eng-blitz-builds-esp`, `eng-m0-go-no-go`, `eng-m1-host-mvp`, `eng-m1-side-by-side-review`, `eng-shadow-dom-upstream`, `plat-h1-p4-gate`, `plat-h2-s3-gate`, `plat-m2-p4-firmware`, `plat-m3-s3-firmware`, `js-j1-quickjs-on-p4`, `js-j2-minimal-dom-apis`, `js-j3-remote-mode`, `js-j4-auto-mode`
+Not shown (no `start`): `eng-m0-go-no-go`, `eng-m1-host-mvp`, `eng-m1-side-by-side-review`, `eng-shadow-dom-upstream`, `plat-h1-p4-gate`, `plat-h2-s3-gate`, `plat-m2-p4-firmware`, `plat-m3-s3-firmware`, `js-j1-quickjs-on-p4`, `js-j2-minimal-dom-apis`, `js-j3-remote-mode`, `js-j4-auto-mode`
 <!-- END GENERATED: timeline -->

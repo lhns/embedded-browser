@@ -1,0 +1,26 @@
+{
+  "arch": "xtensa",
+  "cpu": "esp32s3",
+  "crt-objects-fallback": "false",
+  "data-layout": "e-m:e-p:32:32-v1:8:8-i64:64-i128:128-n32",
+  "emit-debug-gdb-scripts": false,
+  "env": "newlib",
+  "linker": "xtensa-esp32s3-elf-gcc",
+  "linker-flavor": "gnu-cc",
+  "llvm-target": "xtensa-none-elf",
+  "max-atomic-width": 64,
+  "metadata": {
+    "description": "Xtensa ESP32-S3 ESP-IDF (stock xtensa-esp32s3-espidf of the esp toolchain with 64-bit atomics as ESP-IDF libcalls; 32-bit atomics stay inline S32C1I, unsafe on PSRAM)",
+    "host_tools": false,
+    "std": true,
+    "tier": 3
+  },
+  "os": "espidf",
+  "panic-strategy": "abort",
+  "relocation-model": "static",
+  "target-family": [
+    "unix"
+  ],
+  "target-pointer-width": 32,
+  "vendor": "espressif"
+}

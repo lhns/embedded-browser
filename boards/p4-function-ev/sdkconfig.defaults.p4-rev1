@@ -1,0 +1,4 @@
+# Opt-in for ESP32-P4 v0.x/v1.x silicon (early Function-EV boards); not compatible with v3.x.
+# Use: ESP_IDF_SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.p4-rev1"
+CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y
+CONFIG_ESP32P4_REV_MIN_1=y

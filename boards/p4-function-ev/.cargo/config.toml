@@ -1,0 +1,21 @@
+[build]
+# The stock target with 64-bit atomics enabled as ESP-IDF libcalls (blitz-dom and anyrender use
+# AtomicU64 unconditionally); see targets/riscv32imafc-esp-espidf.json.
+target = "targets/riscv32imafc-esp-espidf.json"
+
+[target.'cfg(target_os = "espidf")']
+linker = "ldproxy"
+# ESP-IDF v5.5 uses newlib with a 64-bit time_t. (With ESP-IDF v6+, picolibc: add "--cfg", "espidf_picolibc".)
+rustflags = ["--cfg", "espidf_time64"]
+
+[unstable]
+build-std = ["std", "panic_abort"]
+json-target-spec = true
+
+[env]
+# Defaults for the P4; the S3 compile-only script overrides MCU.
+MCU = { value = "esp32p4", force = false }
+ESP_IDF_VERSION = { value = "v5.5.5", force = false }
+# The target dir lives outside the crate in the Docker builds; tell esp-idf-sys where the
+# workspace is, so it finds sdkconfig.defaults and partitions.csv relative to it.
+CARGO_WORKSPACE_DIR = { value = "", relative = true }

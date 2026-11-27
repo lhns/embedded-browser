@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans", sans-serif; background: #eef1f5; color: #1c2430; }
+  header { display: flex; align-items: center; justify-content: space-between;
+           height: 56px; padding: 0 20px; background: #1f6feb; color: #fff; }
+  header h1 { font-size: 22px; margin: 0; font-weight: bold; }
+  header .clock { font-size: 20px; }
+  main { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 16px; }
+  .card { background: #fff; border-radius: 12px; padding: 14px; border: 1px solid #d5dbe3;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  .card h2 { font-size: 14px; margin: 0 0 6px; color: #5b6676; font-weight: normal; text-transform: uppercase; }
+  .value { font-size: 30px; font-weight: bold; }
+  .unit { font-size: 16px; color: #5b6676; }
+  .wide { grid-column: span 2; }
+  .on { color: #1a7f37; } .off { color: #a40e26; }
+  .bar { height: 10px; border-radius: 5px; background: #d5dbe3; margin-top: 10px; }
+  .bar > div { height: 100%; border-radius: 5px; background: linear-gradient(90deg, #2da44e, #bf8700); }
+  ul { margin: 0; padding-left: 18px; font-size: 15px; line-height: 1.5; }
+  .buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 8px 14px; border-radius: 8px; background: #f3f5f8; border: 1px solid #c2cad6; font-size: 15px; }
+  .btn.active { background: #1f6feb; color: #fff; border-color: #1f6feb; }
+  footer { padding: 0 16px 12px; font-size: 13px; color: #5b6676; }
+</style>
+</head>
+<body>
+<header><h1>Living room</h1><span class="clock">18:42 &middot; Thu 27 Nov</span></header>
+<main>
+  <section class="card"><h2>Temperature</h2><div class="value">21.4<span class="unit"> &deg;C</span></div>
+    <div class="bar"><div style="width: 62%"></div></div></section>
+  <section class="card"><h2>Humidity</h2><div class="value">48<span class="unit"> %</span></div>
+    <div class="bar"><div style="width: 48%"></div></div></section>
+  <section class="card"><h2>Power</h2><div class="value">1.27<span class="unit"> kW</span></div>
+    <div class="bar"><div style="width: 35%"></div></div></section>
+  <section class="card"><h2>Front door</h2><div class="value off">Open</div></section>
+  <section class="card wide"><h2>Lights</h2>
+    <div class="buttons"><span class="btn active">Ceiling</span><span class="btn">Floor lamp</span>
+      <span class="btn active">Kitchen</span><span class="btn">Hallway</span><span class="btn">Terrace</span></div></section>
+  <section class="card wide"><h2>Scenes</h2>
+    <div class="buttons"><span class="btn">Morning</span><span class="btn active">Evening</span>
+      <span class="btn">Movie</span><span class="btn">Away</span></div></section>
+  <section class="card wide"><h2>Today</h2>
+    <ul><li>Bins out tonight &ndash; paper and plastic</li><li>Heating schedule: 06:30 &ndash; 22:00</li>
+      <li>Washing machine finishes at 19:10</li></ul></section>
+  <section class="card"><h2>Heating</h2><div class="value on">On</div></section>
+  <section class="card"><h2>Outside</h2><div class="value">7.9<span class="unit"> &deg;C</span></div></section>
+</main>
+<footer>Synthetic test page for embedded-browser M0. Not a capture of any real installation.</footer>
+</body>
+</html>

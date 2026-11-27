@@ -1,0 +1,50 @@
+[package]
+name = "eb-p4-function-ev"
+version = "0.0.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "M0 hello-Blitz firmware for the ESP32-P4 Function-EV board: parse, style, layout and paint one page, print timings"
+publish = false
+
+# Its own workspace: this crate builds for the ESP-IDF targets only (excluded from the host workspace).
+[workspace]
+
+[[bin]]
+name = "eb-p4-function-ev"
+harness = false
+
+[dependencies]
+# Blitz pinned as in ADR 0002, minimal features: no svg, woff, accessibility, system fonts,
+# file input, custom widgets or ICU text-transform. The phase-time features only print timings.
+blitz-dom = { version = "=0.3.0-beta.6", default-features = false, features = ["log-phase-times"] }
+blitz-html = { version = "=0.3.0-beta.6", default-features = false }
+blitz-paint = { version = "=0.3.0-beta.6", default-features = false }
+blitz-traits = { version = "=0.3.0-beta.6", default-features = false }
+anyrender = "0.15"
+anyrender_vello_cpu = { version = "0.19", default-features = false, features = ["log_frame_times"] }
+parley = { version = "0.13", default-features = false, features = ["std"] }
+
+[target.'cfg(target_os = "espidf")'.dependencies]
+esp-idf-sys = { version = "0.39", features = ["std", "binstart"] }
+# esp-idf-sys 0.39 checks libc's struct layouts and needs 0.2.190 or newer.
+libc = "0.2.190"
+
+[build-dependencies]
+embuild = { version = "0.33.7", features = ["espidf"] }
+
+[package.metadata.esp-idf-sys]
+esp_idf_sdkconfig_defaults = ["sdkconfig.defaults"]
+
+[profile.release]
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+debug = false
+
+[profile.dev]
+# Debug builds of Stylo are too slow and too big for the device; always optimize.
+opt-level = "s"
+
+# ESP-IDF has no mmap; see boards/patches/memmap2/Cargo.toml.
+[patch.crates-io]
+memmap2 = { path = "../patches/memmap2" }

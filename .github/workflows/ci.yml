@@ -41,18 +41,71 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      s3: ${{ steps.f.outputs.s3 }}
+      cross: ${{ steps.filter.outputs.cross }}
+      s3: ${{ steps.filter.outputs.s3 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
-        id: f
+        id: filter
         with:
           filters: |
+            cross:
+              - 'crates/**'
+              - 'boards/p4-*/**'
+              - 'boards/patches/**'
+              - 'docker/p4*'
+              - 'scripts/build-firmware.sh'
+              - 'scripts/size-*'
+              - 'budget.toml'
+              - '.github/workflows/ci.yml'
             s3:
               - 'docker/s3*'
               - 'boards/s3-*/**'
               - 'scripts/qemu*'
               - '.github/workflows/ci.yml'
+
+  # P4 firmware cross-build in the Docker image (ADR 0006) and the app image size gate.
+  cross-p4:
+    needs: changes
+    if: needs.changes.outputs.cross == 'true'
+    runs-on: ubuntu-latest
+    # First run (cold caches): ~15 min, of which ~8 min image build and ~5 min cargo build.
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space for the image and the target dir
+        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/p4.Dockerfile
+          tags: eb-p4-build:ci
+          load: true
+          cache-from: type=gha,scope=p4-image
+          cache-to: type=gha,mode=max,scope=p4-image
+      - uses: actions/cache@v4
+        with:
+          path: ~/eb-cache
+          key: p4-cargo-${{ hashFiles('boards/p4-function-ev/Cargo.lock', 'docker/p4.Dockerfile') }}
+          restore-keys: p4-cargo-
+      - name: Build firmware
+        run: |
+          mkdir -p ~/eb-cache/registry ~/eb-cache/target
+          docker run --rm -v "$PWD:/repo" -v ~/eb-cache/registry:/opt/rust/cargo/registry \
+            -v ~/eb-cache/target:/tmp/eb-target -e OUT_DIR=/repo/out eb-p4-build:ci \
+            bash /repo/scripts/build-firmware.sh
+          sudo chown -R "$(id -u):$(id -g)" out ~/eb-cache
+      - run: scripts/size-gate.sh p4-function-ev out/p4-function-ev-esp32p4/app.bin
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p4-function-ev-firmware
+          path: |
+            out/*/app.bin
+            out/*/bootloader.bin
+            out/*/firmware.elf
+            out/*/*.txt
 
   qemu-s3:
     needs: changes

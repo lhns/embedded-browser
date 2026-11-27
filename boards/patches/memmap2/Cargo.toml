@@ -1,0 +1,11 @@
+[package]
+# Stand-in for memmap2 on ESP-IDF, applied via [patch.crates-io] in the board crates.
+# fontique's `std` feature (required by parley/Blitz) depends on memmap2, whose unix backend
+# needs mmap, which ESP-IDF's libc doesn't have. fontique only uses `Mmap::map(&File)` to load
+# font files, so this reads the file into memory instead. Same version as the crate it replaces.
+name = "memmap2"
+version = "0.9.12"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "memmap2 stand-in for targets without mmap: Mmap::map reads the file into memory"
+publish = false

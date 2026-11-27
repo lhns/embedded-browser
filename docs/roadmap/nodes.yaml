@@ -128,20 +128,20 @@
   title: "Blitz builds for ESP32 targets"
   track: eng
   kind: experiment
-  state: next
+  state: done
   outcome: unrated
-  evidence: []
+  evidence: ["docs/m0/esp-build-results.md"]
   verdict_quote: ""
-  headline: ""
+  headline: "Builds for P4 and S3 with two small shims, no Stylo changes; P4 image 5.8 MiB"
   depends_on: [ci-workspace-skeleton]
   replaced_by: []
   lane: docker
-  start: ""
-  end: ""
+  start: 2026-11-27
+  end: 2026-11-27
   folded: []
   overview: false
   plain: "Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads."
-  notes: "Done when: hello-Blitz compiles for the P4 (and S3, compile-only), 64-bit atomics availability is recorded, sequential Stylo is confirmed thread-free, the P4 image size is recorded against the go (<=8MB), fallback (8-14MB) and stop (>14MB) thresholds, and a hello firmware that prints timings over serial is ready for H1."
+  notes: "Done when: hello-Blitz compiles for the P4 (and S3, compile-only), 64-bit atomics availability is recorded, sequential Stylo is confirmed thread-free, the P4 image size is recorded against the go (<=8MB), fallback (8-14MB) and stop (>14MB) thresholds, and a hello firmware that prints timings over serial is ready for H1. Result: P4 and S3 (compile-only) build with Blitz =0.3.0-beta.6 unmodified, using a memmap2 stand-in and a target spec with 64-bit atomics as ESP-IDF libcalls; neither target has 64-bit atomics natively. P4 app image 6,081,152 bytes (go band), S3 6,336,288. Sequential Stylo spawned no threads on a Linux host run. Open: S3 Arc/atomics on PSRAM are unsafe with the stock Xtensa target (inline S32C1I), so H2 must check it; P4 images default to chip rev v3.01+."
 
 - id: eng-peak-heap
   title: "Measure peak heap by category"

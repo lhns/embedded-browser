@@ -1,0 +1,6 @@
+# Flash budgets for the firmware app images, checked by scripts/size-gate.sh in CI.
+# M0 thresholds (plan): go <= 8 MB, fallback 8-14 MB, stop > 14 MB (the factory partition).
+# The image is the app binary written by `espflash save-image` (what goes into the factory partition).
+
+[p4-function-ev]
+app_image_max_bytes = 8388608 # 8 MiB
