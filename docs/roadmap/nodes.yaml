@@ -350,7 +350,7 @@
   folded: []
   overview: true
   plain: "Browser firmware for the two ESP32-S3 boards."
-  notes: "Done when: pages render and scroll by touch on the S3-BOX-3 (SPI) and then the 7-inch RGB board. If H2 fails on atomics, the S3 gets the fallback engine."
+  notes: "Done when: pages render and scroll by touch on the S3-BOX-3 (SPI) and then the 7-inch RGB board. If H2 fails on atomics, the S3 uses a software-atomics target spec (any Rust Arc or Mutex in PSRAM is affected, whatever the engine)."
 
 - id: js-j1-quickjs-on-p4
   title: "J1 QuickJS on the P4"
