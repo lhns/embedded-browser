@@ -1,0 +1,5 @@
+# ESP32-P4 Function-EV / Guition JC1060P470: 32 MB in-package hex PSRAM at 200 MHz.
+CONFIG_SPIRAM_SPEED_200M=y
+# Chip revision: ESP-IDF v5.5 builds for v3.01+ silicon by default and such an image doesn't boot
+# on v0.x/v1.x chips (and vice versa). For an older board (check with `espflash board-info`),
+# add sdkconfig.defaults.p4-rev1; see docs/m0/esp-build-results.md.

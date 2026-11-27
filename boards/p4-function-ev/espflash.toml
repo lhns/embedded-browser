@@ -1,0 +1,6 @@
+# Used by `espflash flash` / `save-image` run from this directory.
+[idf_format_args]
+partition_table = "partitions.csv"
+
+[flash]
+size = "16MB"

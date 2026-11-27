@@ -1,0 +1,29 @@
+{
+  "arch": "riscv32",
+  "cpu": "generic-rv32",
+  "crt-objects-fallback": "false",
+  "data-layout": "e-m:e-p:32:32-i64:64-n32-S128",
+  "eh-frame-header": false,
+  "emit-debug-gdb-scripts": false,
+  "env": "newlib",
+  "features": "+m,+a,+c,+f",
+  "linker": "riscv32-esp-elf-gcc",
+  "linker-flavor": "gnu-cc",
+  "llvm-abiname": "ilp32f",
+  "llvm-target": "riscv32",
+  "max-atomic-width": 64,
+  "metadata": {
+    "description": "RISC-V ESP-IDF (stock riscv32imafc-esp-espidf with 64-bit atomics as ESP-IDF libcalls)",
+    "host_tools": false,
+    "std": true,
+    "tier": 3
+  },
+  "os": "espidf",
+  "panic-strategy": "abort",
+  "relocation-model": "static",
+  "target-family": [
+    "unix"
+  ],
+  "target-pointer-width": 32,
+  "vendor": "espressif"
+}

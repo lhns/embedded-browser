@@ -1,0 +1,7 @@
+# Pinned nightly: riscv32imafc-esp-espidf is a tier-3 target, so std is built from rust-src.
+# Must match RUST_NIGHTLY in docker/p4.Dockerfile. Newer nightlies cannot build std for ESP-IDF: libc
+# 0.2.191 renamed the stat fields std reads (rust-lang/rust#164555); esp-rs/esp-idf CI pins this one too.
+# S3 builds override it with `cargo +esp` (espup toolchain).
+[toolchain]
+channel = "nightly-2026-10-19"
+components = ["rust-src"]
