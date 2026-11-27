@@ -16,8 +16,10 @@ gantt
     Blitz builds for ESP32 targets :eng_blitz_builds_esp, 2026-11-27, 2026-11-27
     Measure peak heap by category :eng_peak_heap, 2026-11-27, 2026-11-27
     Estimate raster speed :eng_raster_estimate, 2026-11-27, 2026-11-27
+    M0 go or no-go :eng_m0_go_no_go, 2026-11-27, 2026-11-27
     section plat - platform
     ESP32-P4 first, then S3 :plat_boards_p4_first, 2026-11-27, 2026-11-27
+    S3 crash in first paint :plat_defect_s3_paint_crash, 2026-11-27, 2026-11-27
     section js - JavaScript
     No JavaScript in v1 :js_no_js_in_v1, 2026-11-27, 2026-11-27
     Run corpus scripts in QuickJS :js_host_spike, 2026-11-27, 2026-11-27
@@ -30,5 +32,5 @@ gantt
     Choose the test page corpus :doc_corpus_choice, 2026-11-27, 2026-11-27
 ```
 
-Not shown (no `start`): `eng-m0-go-no-go`, `eng-m1-host-mvp`, `eng-m1-side-by-side-review`, `eng-shadow-dom-upstream`, `plat-h1-p4-gate`, `plat-h2-s3-gate`, `plat-m2-p4-firmware`, `plat-m3-s3-firmware`, `js-j1-quickjs-on-p4`, `js-j2-minimal-dom-apis`, `js-j3-remote-mode`, `js-j4-auto-mode`
+Not shown (no `start`): `eng-m1-host-mvp`, `eng-m1-side-by-side-review`, `eng-shadow-dom-upstream`, `eng-fork-atomic-u64`, `eng-fork-memmap-shim`, `plat-h1-p4-gate`, `plat-h2-s3-gate`, `plat-m2-p4-firmware`, `plat-m3-s3-firmware`, `js-j1-quickjs-on-p4`, `js-j2-minimal-dom-apis`, `js-j3-remote-mode`, `js-j4-auto-mode`
 <!-- END GENERATED: timeline -->

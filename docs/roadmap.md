@@ -102,22 +102,27 @@ flowchart TB
         js_no_js_in_v1{{"js · ✔ No JavaScript<br/>in v1"}}
         plat_boards_p4_first{{"plat · ✔ ESP32-P4<br/>first, then S3"}}
         ci_workspace_skeleton["ci · ✔ Workspace<br/>skeleton"]
+        eng_m0_go_no_go{{"eng · ✔ M0 go or no-go"}}
     end
-    subgraph bd_1["Later (blocked or parked)"]
-        eng_m1_host_mvp["eng · ⛔ M1 host MVP"]
+    subgraph bd_1["Next"]
+        eng_m1_host_mvp["eng · ○ M1 host MVP"]
+    end
+    subgraph bd_2["Later (blocked or parked)"]
         plat_h1_p4_gate[/"plat · ⛔ H1 ESP32-P4<br/>hardware gate"/]
         plat_m2_p4_firmware["plat · ⛔ M2 P4<br/>firmware"]
         plat_m3_s3_firmware["plat · ⛔ M3 S3<br/>firmware"]
         js_j3_remote_mode["js · ⏸ J3 remote<br/>browser mode"]
     end
     eng_std_only_esp_idf ~~~ ci_workspace_skeleton
-    js_no_js_in_v1 ~~~ ci_workspace_skeleton
-    plat_boards_p4_first ~~~ ci_workspace_skeleton
+    js_no_js_in_v1 ~~~ eng_m0_go_no_go
+    plat_boards_p4_first ~~~ eng_m0_go_no_go
     ci_workspace_skeleton ~~~ eng_m1_host_mvp
-    ci_workspace_skeleton ~~~ plat_h1_p4_gate
-    eng_m1_host_mvp ~~~ plat_m2_p4_firmware
+    eng_m0_go_no_go ~~~ eng_m1_host_mvp
+    eng_m1_host_mvp ~~~ plat_h1_p4_gate
+    plat_h1_p4_gate ~~~ plat_m2_p4_firmware
     plat_h1_p4_gate ~~~ plat_m3_s3_firmware
     plat_h1_p4_gate ~~~ js_j3_remote_mode
+    eng_m0_go_no_go --> eng_m1_host_mvp
     plat_h1_p4_gate --> plat_m2_p4_firmware
     eng_m1_host_mvp --> plat_m2_p4_firmware
     eng_m1_host_mvp --> plat_m3_s3_firmware
@@ -135,9 +140,10 @@ flowchart TB
     classDef decided fill:#ece0f7,stroke:#7b3fb5,stroke-dasharray:2 2,color:#111
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
-    class eng_std_only_esp_idf,js_no_js_in_v1,plat_boards_p4_first decided
+    class eng_std_only_esp_idf,js_no_js_in_v1,plat_boards_p4_first,eng_m0_go_no_go decided
     class ci_workspace_skeleton unrated
-    class eng_m1_host_mvp,plat_h1_p4_gate,plat_m2_p4_firmware,plat_m3_s3_firmware blocked
+    class eng_m1_host_mvp next
+    class plat_h1_p4_gate,plat_m2_p4_firmware,plat_m3_s3_firmware blocked
     class js_j3_remote_mode parked
 ```
 <!-- END GENERATED: overview -->
@@ -148,15 +154,18 @@ flowchart TB
 | title | status | in plain words |
 |---|---|---|
 | Target ESP-IDF std only | ✔ done · n/a | All Servo parts need std, so the engine runs on ESP-IDF std boards only; no_std chips are out. |
-| M0 go or no-go | ⛔ blocked | The owner decides from the host numbers whether to build on Blitz, switch to a smaller engine, or stop. |
-| M1 host MVP | ⛔ blocked | The core engine and simulator render the test pages on a PC, and taps follow links. |
+| M0 go or no-go | ✔ done · n/a | The owner chose go with Blitz: it builds for the P4 with two shallow shims, the image is 6.3 MiB and peak heap is at most 10.5 MB. |
+| M1 host MVP | ○ next | The core engine and simulator render the test pages on a PC, and taps follow links. |
 | M1 side-by-side review | ⛔ blocked | The owner compares our rendering with a real browser and signs off. |
 | Shadow DOM in Blitz | ⏸ parked | Contribute shadow DOM support to Blitz, the path to running Home Assistant on the device. Tracked, not planned. |
+| Fork fix for 64-bit atomics | ⏸ parked | blitz-dom and anyrender use 64-bit atomics everywhere; patching our own fork of them would let us drop the custom target specs. |
+| Fork fix for font file mapping | ⏸ parked | The font library maps font files into memory, which ESP-IDF can't do; we swap in a stand-in that reads them instead. |
 | ESP32-P4 first, then S3 | ✔ done · n/a | The ESP32-P4 boards come first, then the two ESP32-S3 boards. |
 | H1 ESP32-P4 hardware gate | ⛔ blocked | Once a P4 board arrives, flash the hello firmware and measure real speed. |
 | H2 ESP32-S3 hardware gate | ⛔ blocked | Once an S3 board arrives, check that atomics in external memory work and repeat the speed tests. |
 | M2 P4 firmware | ⛔ blocked | Browser firmware for the ESP32-P4 board with display, touch, Wi-Fi and HTTPS. |
 | M3 S3 firmware | ⛔ blocked | Browser firmware for the two ESP32-S3 boards. |
+| S3 crash in first paint | ⚠ open | On the emulated S3, hello-Blitz parses, styles and lays out the page, then crashes in vello_cpu's alpha compositing on the first paint. |
 | No JavaScript in v1 | ✔ done · n/a | Version 1 renders pages without running scripts; JavaScript is a parallel track. |
 | J1 QuickJS on the P4 | ⏸ parked | Check that the QuickJS-ng JavaScript engine fits and runs fast enough on the P4. |
 | J2 minimal DOM and web APIs | ⏸ parked | Give scripts a small DOM and the web calls small dashboards use. |
@@ -168,7 +177,13 @@ flowchart TB
 ## Ready now
 
 <!-- BEGIN GENERATED: ready-now -->
-_None._
+**host**
+
+- `eng-m1-host-mvp`: M1 host MVP
+
+**docker**
+
+- `plat-defect-s3-paint-crash`: S3 crash in first paint
 <!-- END GENERATED: ready-now -->
 
 ## Running
@@ -186,7 +201,6 @@ _None._
 ## Waiting on the owner
 
 <!-- BEGIN GENERATED: waiting-on-owner -->
-- `eng-m0-go-no-go`: M0 go or no-go
 - `eng-m1-side-by-side-review`: M1 side-by-side review
 <!-- END GENERATED: waiting-on-owner -->
 
@@ -201,7 +215,7 @@ Generated on 2026-11-27.
 ## Done, by month
 
 <!-- BEGIN GENERATED: done-by-month -->
-<details><summary><b>Nov 2026</b>: 12 done</summary>
+<details><summary><b>Nov 2026</b>: 13 done</summary>
 
 - `ci-emulation-check`: Check ESP32 emulation options (✔ done · unrated). See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3.
 - `ci-workspace-skeleton`: Workspace skeleton (✔ done · unrated). Empty Cargo workspace, ADRs 0001-0006, this roadmap and a first CI workflow.
@@ -209,6 +223,7 @@ Generated on 2026-11-27.
 - `doc-name-embedded-browser`: Name the project (✔ done · n/a). The owner chose the name embedded-browser.
 - `doc-public-repo`: Make the repository public (✔ done · n/a). The repository is public under MIT OR Apache-2.0, so test pages must be safe to publish.
 - `eng-blitz-builds-esp`: Blitz builds for ESP32 targets (✔ done · unrated). Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads.
+- `eng-m0-go-no-go`: M0 go or no-go (✔ done · n/a). The owner chose go with Blitz: it builds for the P4 with two shallow shims, the image is 6.3 MiB and peak heap is at most 10.5 MB.
 - `eng-peak-heap`: Measure peak heap by category (✔ done · unrated). Measure how much memory the engine needs for each corpus page, split by what uses it.
 - `eng-raster-estimate`: Estimate raster speed (✔ done · unrated). Time the two software rasterizers on the host to guess how fast the P4 will draw.
 - `eng-std-only-esp-idf`: Target ESP-IDF std only (✔ done · n/a). All Servo parts need std, so the engine runs on ESP-IDF std boards only; no_std chips are out.
@@ -224,8 +239,8 @@ Generated on 2026-11-27.
 <!-- BEGIN GENERATED: tracks -->
 Each track has its own page with its tree, node table and per-node details.
 
-- [eng - engine](roadmap/tracks/eng.md): 8 nodes (4 done, 3 blocked, 1 parked)
-- [plat - platform](roadmap/tracks/plat.md): 5 nodes (1 done, 4 blocked)
+- [eng - engine](roadmap/tracks/eng.md): 10 nodes (5 done, 1 next, 1 blocked, 3 parked)
+- [plat - platform](roadmap/tracks/plat.md): 6 nodes (1 done, 1 next, 4 blocked)
 - [js - JavaScript](roadmap/tracks/js.md): 6 nodes (2 done, 4 parked)
 - [ci - build and test](roadmap/tracks/ci.md): 2 nodes (2 done)
 - [doc - documentation](roadmap/tracks/doc.md): 3 nodes (3 done)
