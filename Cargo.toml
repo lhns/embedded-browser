@@ -4,6 +4,7 @@ members = [
     "crates/embedded-browser",
     "crates/embedded-browser-assets",
     "crates/embedded-browser-sim",
+    "tools/js-spike",
     "tools/measure",
 ]
 exclude = ["boards/*"]

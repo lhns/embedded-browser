@@ -1,0 +1,8 @@
+{
+  "url": "http://192.168.1.50/",
+  "http": [
+    [".?m=1", "{t}{s}ESP32 Temperature{m}41.2°C{e}{s}Temperature{m}21.4°C{e}{s}Humidity{m}45%{e}</table>{t}<tr><td style='width:50%;text-align:center;font-weight:bold;font-size:62px'>ON</td><td style='width:50%;text-align:center;font-weight:bold;font-size:62px'>OFF</td></tr></table>", "text/html", "GET"]
+  ],
+  "ws": [],
+  "sse": []
+}

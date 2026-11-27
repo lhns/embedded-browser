@@ -1,0 +1,28 @@
+<!doctype html>
+<!-- Synthetic host approximating the page ESPHome's web_server (version 1) serves. The
+     script is ESPHome's webserver-v1.js (served as www.js), fetched at test time by
+     tools/js-spike/fetch_corpus.py and not committed. -->
+<html>
+<head><meta charset="UTF-8"><title>livingroom</title></head>
+<body>
+  <article class="markdown-body">
+    <h1>livingroom</h1>
+    <h2>States</h2>
+    <table id="states">
+      <thead><tr><th>Name</th><th>State</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr class="sensor" id="sensor-temperature"><td>Temperature</td><td></td><td></td></tr>
+        <tr class="sensor" data-domain="sensor" data-name="Humidity"><td>Humidity</td><td></td><td></td></tr>
+        <tr class="switch" id="switch-relay"><td>Relay</td><td></td><td><button>Toggle</button></td></tr>
+        <tr class="light" data-domain="light" data-name="Desk lamp"><td>Desk lamp</td><td></td><td><button>Toggle</button></td></tr>
+        <tr class="cover" id="cover-blind"><td>Blind</td><td></td><td><button>Open</button><button>Close</button></td></tr>
+        <tr class="select" id="select-mode"><td>Mode</td><td></td><td><select><option>Auto</option><option>Manual</option></select></td></tr>
+      </tbody>
+    </table>
+    <p>See <a href="https://esphome.io/web-api/index.html">ESPHome Web API</a> for REST API documentation.</p>
+    <h2>Debug Log</h2>
+    <pre id="log"></pre>
+    <script src="../../fetched/esphome-v1/www.js"></script>
+  </article>
+</body>
+</html>

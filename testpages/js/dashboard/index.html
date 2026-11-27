@@ -1,0 +1,17 @@
+<!doctype html>
+<!-- Synthetic hand-written smart-home panel: REST for the initial states, the Home Assistant
+     style WebSocket API for live updates, click handlers that call services. No real data. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Panel</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <header><h1>Living room</h1><span id="clock">--:--</span><span id="conn" class="offline">offline</span></header>
+  <main id="cards"></main>
+  <footer><button id="theme">Theme</button><button id="refresh" onclick="refresh()">Refresh</button></footer>
+  <template id="card-tpl"><section class="card"><h2 class="name"></h2><p class="state"></p><button class="toggle" hidden>Toggle</button></section></template>
+  <script src="dashboard.js"></script>
+</body>
+</html>
