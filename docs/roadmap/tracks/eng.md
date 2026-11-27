@@ -9,14 +9,15 @@ Scope: parse, style, layout, paint, events.
 <!-- BEGIN GENERATED: track-eng -->
 ```mermaid
 flowchart TB
+    eng_std_only_esp_idf{{"✔ Target ESP-IDF std<br/>only"}}
     eng_blitz_builds_esp[/"○ Blitz builds for<br/>ESP32 targets"/]
     eng_peak_heap[/"○ Measure peak heap by<br/>category"/]
     eng_raster_estimate[/"○ Estimate raster<br/>speed"/]
     eng_m1_host_mvp["⛔ M1 host MVP"]
     eng_shadow_dom_upstream["⏸ Shadow DOM in Blitz"]
+    eng_std_only_esp_idf ~~~ eng_raster_estimate
     eng_blitz_builds_esp ~~~ eng_m1_host_mvp
     eng_peak_heap ~~~ eng_shadow_dom_upstream
-    eng_raster_estimate ~~~ eng_shadow_dom_upstream
     eng_blitz_builds_esp --> eng_m1_host_mvp
     eng_peak_heap --> eng_m1_host_mvp
     classDef vsucc fill:#2e9e4f,stroke:#1b6b34,color:#fff
@@ -33,6 +34,7 @@ flowchart TB
     classDef decided fill:#ece0f7,stroke:#7b3fb5,stroke-dasharray:2 2,color:#111
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
+    class eng_std_only_esp_idf decided
     class eng_blitz_builds_esp,eng_peak_heap,eng_raster_estimate next
     class eng_m1_host_mvp blocked
     class eng_shadow_dom_upstream parked

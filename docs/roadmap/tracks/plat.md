@@ -9,11 +9,13 @@ Scope: ESP adapters and board firmware.
 <!-- BEGIN GENERATED: track-plat -->
 ```mermaid
 flowchart TB
+    plat_boards_p4_first{{"✔ ESP32-P4 first, then<br/>S3"}}
     plat_h1_p4_gate[/"⛔ H1 ESP32-P4 hardware<br/>gate"/]
     plat_h2_s3_gate[/"⛔ H2 ESP32-S3 hardware<br/>gate"/]
     plat_m2_p4_firmware["⛔ M2 P4 firmware"]
     plat_m3_s3_firmware["⛔ M3 S3 firmware"]
-    plat_h1_p4_gate ~~~ plat_m2_p4_firmware
+    plat_boards_p4_first ~~~ plat_m2_p4_firmware
+    plat_h1_p4_gate ~~~ plat_m3_s3_firmware
     plat_h2_s3_gate ~~~ plat_m3_s3_firmware
     plat_h1_p4_gate --> plat_m2_p4_firmware
     plat_h2_s3_gate --> plat_m3_s3_firmware
@@ -31,6 +33,7 @@ flowchart TB
     classDef decided fill:#ece0f7,stroke:#7b3fb5,stroke-dasharray:2 2,color:#111
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
+    class plat_boards_p4_first decided
     class plat_h1_p4_gate,plat_h2_s3_gate,plat_m2_p4_firmware,plat_m3_s3_firmware blocked
 ```
 <!-- END GENERATED: track-plat -->

@@ -9,11 +9,13 @@ Scope: on-device JS and remote mode.
 <!-- BEGIN GENERATED: track-js -->
 ```mermaid
 flowchart TB
+    js_no_js_in_v1{{"✔ No JavaScript in v1"}}
     js_host_spike[/"○ Run corpus scripts<br/>in QuickJS"/]
     js_j1_quickjs_on_p4[/"⏸ J1 QuickJS on the P4"/]
     js_j2_minimal_dom_apis["⏸ J2 minimal DOM and<br/>web APIs"]
     js_j3_remote_mode["⏸ J3 remote browser<br/>mode"]
     js_j4_auto_mode["⏸ J4 auto local or<br/>remote mode"]
+    js_no_js_in_v1 ~~~ js_j1_quickjs_on_p4
     js_host_spike ~~~ js_j1_quickjs_on_p4
     js_j1_quickjs_on_p4 ~~~ js_j2_minimal_dom_apis
     js_j1_quickjs_on_p4 ~~~ js_j3_remote_mode
@@ -38,6 +40,7 @@ flowchart TB
     classDef decided fill:#ece0f7,stroke:#7b3fb5,stroke-dasharray:2 2,color:#111
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
+    class js_no_js_in_v1 decided
     class js_host_spike next
     class js_j1_quickjs_on_p4,js_j2_minimal_dom_apis,js_j3_remote_mode,js_j4_auto_mode parked
 ```
