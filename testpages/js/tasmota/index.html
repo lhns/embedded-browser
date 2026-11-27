@@ -1,0 +1,25 @@
+<!doctype html>
+<!-- Synthetic host approximating the markup Tasmota's HandleRoot() sends for a two-relay
+     ESP32 with a dimmer. The script itself is Tasmota's (GPL-3.0), fetched at test time by
+     tools/js-spike/fetch_corpus.py and not committed. -->
+<html lang="en" class="">
+<head>
+  <meta charset="utf-8">
+  <title>ESP32-DevKit - Main Menu</title>
+  <script src="../../fetched/tasmota/root.js"></script>
+</head>
+<body>
+  <div style="text-align:left;display:inline-block;color:#eaeaea;min-width:340px;">
+    <div style="text-align:center;color:#eaeaea;"><noscript>To use Tasmota, please enable JavaScript<br></noscript><h3>ESP32-DevKit</h3><h2>Tasmota</h2></div>
+    <div style="padding:0;" id="l1" name="l1"></div><div></div>
+    <table style="width:100%"><tr><td><input type="range" id="sl4" min="0" max="100" value="50" onchange='lc("d",0,value)'></td></tr></table>
+    <table style="width:100%"><tr>
+      <td style="width:50%"><button id="o1" onclick='la("&o=1");'>Toggle 1</button></td>
+      <td style="width:50%"><button id="o2" onclick='la("&o=2");'>Toggle 2</button></td>
+    </tr></table>
+    <div id="but3d" style="display: block;"></div>
+    <p><form id="but3" style="display: block;" action="cn" method="get"><button>Configuration</button></form></p>
+    <p><form id="but5" style="display: block;" action="in" method="get"><button>Information</button></form></p>
+  </div>
+</body>
+</html>

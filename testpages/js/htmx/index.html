@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- Synthetic htmx panel: polling, click-to-load, a form post and an out-of-band swap.
+     htmx.min.js is htmx 2.0.11 (0BSD, see LICENSE). -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>htmx panel</title>
+  <script src="htmx.min.js"></script>
+</head>
+<body hx-boost="false">
+  <h1>Garage</h1>
+  <div id="status" hx-get="/status" hx-trigger="load, every 2s" hx-swap="innerHTML">loading...</div>
+  <button id="door" hx-post="/door/toggle" hx-target="#result" hx-swap="innerHTML">Toggle door</button>
+  <button id="more" hx-get="/details" hx-target="#details" hx-swap="outerHTML">Details</button>
+  <div id="details"></div>
+  <form id="setpoint" hx-post="/setpoint" hx-target="#result">
+    <input name="temp" type="number" value="21">
+    <button type="submit">Set</button>
+  </form>
+  <div id="result"></div>
+  <div id="alerts"></div>
+</body>
+</html>

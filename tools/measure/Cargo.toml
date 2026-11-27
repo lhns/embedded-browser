@@ -7,3 +7,29 @@ license.workspace = true
 repository.workspace = true
 description = "Heap and raster measurement tool for embedded-browser"
 publish = false
+
+[features]
+# Inline SVG (usvg) costs heap and code size; off unless measuring its delta.
+svg = ["blitz-dom/svg", "blitz-paint/svg"]
+
+[dependencies]
+# Minimal Blitz: no system fonts, no ICU text-transform, no a11y, no net, no SVG.
+# `floats` is on because real articles need it (it is not in Blitz's defaults).
+blitz-dom = { version = "=0.3.0-beta.6", default-features = false, features = ["floats"] }
+blitz-html = { version = "=0.3.0-beta.6", default-features = false }
+blitz-paint = { version = "=0.3.0-beta.6", default-features = false }
+blitz-traits = { version = "=0.3.0-beta.6", default-features = false }
+anyrender = "0.15"
+anyrender_vello_cpu = { version = "0.19", default-features = false }
+anyrender_tiny_skia = { version = "0.1.1", default-features = false }
+parley = { version = "0.13", default-features = false, features = ["std"] }
+kurbo = "0.13"
+url = "2"
+data-url = "0.3"
+# blitz-dom pulls `image` with no codecs: PNG for the corpus, JPEG and GIF for fetched pages.
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif"] }
+rayon = "1"
+ttf-noto-sans = { version = "0.1.2", features = ["regular", "bold"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Threading"] }

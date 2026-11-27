@@ -1,0 +1,36 @@
+[package]
+name = "s3-qemu-test"
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.91"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[[bin]]
+name = "s3-qemu-test"
+harness = false
+
+[profile.release]
+opt-level = "s"
+
+[profile.dev]
+debug = true
+opt-level = "z"
+
+[dependencies]
+embedded-graphics = "0.8"
+esp-idf-svc = "0.54"
+log = "0.4"
+
+[build-dependencies]
+embuild = "0.33"
+
+# The Espressif QEMU RGB panel driver is an IDF component; bindings_header exposes it to Rust
+# as esp_idf_svc::sys::qemu_rgb.
+[[package.metadata.esp-idf-sys.extra_components]]
+remote_component = { name = "espressif/esp_lcd_qemu_rgb", version = "1.0.2" }
+bindings_header = "bindings.h"
+bindings_module = "qemu_rgb"
+
+# Own workspace: keeps this crate out of the host workspace (also excluded via boards/*).
+[workspace]
