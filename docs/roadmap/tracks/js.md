@@ -10,7 +10,7 @@ Scope: on-device JS and remote mode.
 ```mermaid
 flowchart TB
     js_no_js_in_v1{{"✔ No JavaScript in v1"}}
-    js_host_spike[/"○ Run corpus scripts<br/>in QuickJS"/]
+    js_host_spike[/"✔ Run corpus scripts<br/>in QuickJS"/]
     js_j1_quickjs_on_p4[/"⏸ J1 QuickJS on the P4"/]
     js_j2_minimal_dom_apis["⏸ J2 minimal DOM and<br/>web APIs"]
     js_j3_remote_mode["⏸ J3 remote browser<br/>mode"]
@@ -41,7 +41,7 @@ flowchart TB
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
     class js_no_js_in_v1 decided
-    class js_host_spike next
+    class js_host_spike unrated
     class js_j1_quickjs_on_p4,js_j2_minimal_dom_apis,js_j3_remote_mode,js_j4_auto_mode parked
 ```
 <!-- END GENERATED: track-js -->
@@ -52,7 +52,7 @@ flowchart TB
 | id | title | kind | lane | state | outcome | start | end | depends_on | replaced_by | qualified_by | headline | evidence |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `js-no-js-in-v1` | No JavaScript in v1 | owner-decision | owner | done | n/a | 2026-11-27 | 2026-11-27 |  |  |  |  | docs/adr/0004-js-hybrid-strategy.md |
-| `js-host-spike` | Run corpus scripts in QuickJS | experiment | host | next | unrated |  |  | ci-workspace-skeleton |  |  |  |  |
+| `js-host-spike` | Run corpus scripts in QuickJS | experiment | host | done | unrated | 2026-11-27 | 2026-11-27 | ci-workspace-skeleton |  |  | J2 corpus runs under 1 MB (32-bit); cold parse is the P4 risk | docs/m0/js-spike-results.md; tools/js-spike |
 | `js-j1-quickjs-on-p4` | J1 QuickJS on the P4 | experiment | hardware | parked | unrated |  |  | js-host-spike, plat-h1-p4-gate |  |  |  |  |
 | `js-j2-minimal-dom-apis` | J2 minimal DOM and web APIs | feature | host | parked | unrated |  |  | js-j1-quickjs-on-p4 |  |  |  |  |
 | `js-j3-remote-mode` | J3 remote browser mode | feature | docker | parked | unrated |  |  | js-host-spike |  |  |  |  |
@@ -63,7 +63,7 @@ flowchart TB
 | id | title | verdict | headline | in plain words | notes | confirmed | waiting on | queue order | order reason |
 |---|---|---|---|---|---|---|---|---|---|
 | `js-no-js-in-v1` | No JavaScript in v1 |  |  | Version 1 renders pages without running scripts; JavaScript is a parallel track. |  |  |  |  |  |
-| `js-host-spike` | Run corpus scripts in QuickJS |  |  | On the host, run the small corpus scripts in QuickJS-ng to learn how much memory and which web APIs they need. | Done when: the custom dashboard, Tasmota, ESPHome v1 and htmx scripts run under a memory cap with a logging stub DOM, with peak heap, parse time and the list of web APIs touched recorded. The Home Assistant bundle is measured for information only. |  |  |  |  |
+| `js-host-spike` | Run corpus scripts in QuickJS |  | J2 corpus runs under 1 MB (32-bit); cold parse is the P4 risk | On the host, run the small corpus scripts in QuickJS-ng to learn how much memory and which web APIs they need. | Done when: the custom dashboard, Tasmota, ESPHome v1 and htmx scripts run under a memory cap with a logging stub DOM, with peak heap, parse time and the list of web APIs touched recorded. The Home Assistant bundle is measured for information only. Result: all four (and petite-vue) complete with no exceptions under 1 MB at 32-bit (peak 0.3-0.94 MB incl. runtime); J2 needs about 130 API members on 34 interfaces, no shadow DOM or canvas. Cold compile is 3-6 KB/ms on the host (0.7-2.5 s per 100 KB at a provisional 20-75x P4 derate) while stripped bytecode loads 13-21x faster. QuickJS-ng adds about 0.55-0.75 MB flash. HA pulls 4.6 MB of modules and 34 MB heap before rendering, confirming remote mode. |  |  |  |  |
 | `js-j1-quickjs-on-p4` | J1 QuickJS on the P4 |  |  | Check that the QuickJS-ng JavaScript engine fits and runs fast enough on the P4. | Done when: QuickJS-ng runs on the P4 via rquickjs (fallback: Espressif component via bindgen) with flash cost <=1.5MB, idle RAM <=1MB, and a 100KB script parsed in <=300ms. |  |  |  |  |
 | `js-j2-minimal-dom-apis` | J2 minimal DOM and web APIs |  |  | Give scripts a small DOM and the web calls small dashboards use. | Done when: querySelector, attributes, text, classList, style, events, timers, fetch/XHR, WebSocket and EventSource work, unsupported APIs are stubbed and logged, the custom dashboard, Tasmota, ESPHome v1 and htmx pages work, touch-to-pixel p95 is <=100ms and a 24h soak passes. |  |  |  |  |
 | `js-j3-remote-mode` | J3 remote browser mode |  |  | Show Home Assistant by streaming a real browser running on a server. This bypasses our renderer. | Done when: a VNC-style client and a companion container (Chromium kiosk, Xvfb, x11vnc, usable as an HA add-on) show HA Lovelace and Grafana with touch-to-visible p95 <=150ms. |  |  |  |  |

@@ -204,20 +204,20 @@
   title: "Run corpus scripts in QuickJS"
   track: js
   kind: experiment
-  state: next
+  state: done
   outcome: unrated
-  evidence: []
+  evidence: ["docs/m0/js-spike-results.md", "tools/js-spike"]
   verdict_quote: ""
-  headline: ""
+  headline: "J2 corpus runs under 1 MB (32-bit); cold parse is the P4 risk"
   depends_on: [ci-workspace-skeleton]
   replaced_by: []
   lane: host
-  start: ""
-  end: ""
+  start: 2026-11-27
+  end: 2026-11-27
   folded: []
   overview: false
   plain: "On the host, run the small corpus scripts in QuickJS-ng to learn how much memory and which web APIs they need."
-  notes: "Done when: the custom dashboard, Tasmota, ESPHome v1 and htmx scripts run under a memory cap with a logging stub DOM, with peak heap, parse time and the list of web APIs touched recorded. The Home Assistant bundle is measured for information only."
+  notes: "Done when: the custom dashboard, Tasmota, ESPHome v1 and htmx scripts run under a memory cap with a logging stub DOM, with peak heap, parse time and the list of web APIs touched recorded. The Home Assistant bundle is measured for information only. Result: all four (and petite-vue) complete with no exceptions under 1 MB at 32-bit (peak 0.3-0.94 MB incl. runtime); J2 needs about 130 API members on 34 interfaces, no shadow DOM or canvas. Cold compile is 3-6 KB/ms on the host (0.7-2.5 s per 100 KB at a provisional 20-75x P4 derate) while stripped bytecode loads 13-21x faster. QuickJS-ng adds about 0.55-0.75 MB flash. HA pulls 4.6 MB of modules and 34 MB heap before rendering, confirming remote mode."
 
 - id: eng-m0-go-no-go
   title: "M0 go or no-go"

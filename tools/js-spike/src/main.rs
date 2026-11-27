@@ -624,6 +624,13 @@ fn main() {
         }
     }
     // Deep recursion in the parser needs more than the default main-thread stack on Windows.
+    // Reports name files relative to the repo root, not by local absolute paths.
+    let root_prefix = format!(
+        "{}/",
+        engine::normalize(&std::path::absolute(&root).unwrap_or(root.clone()))
+            .to_string_lossy()
+            .replace('\\', "/")
+    );
     let handle = std::thread::Builder::new()
         .stack_size(64 << 20)
         .spawn(move || {
@@ -656,7 +663,10 @@ fn main() {
             text
         })
         .expect("thread");
-    let text = handle.join().expect("spike thread panicked");
+    let text = handle
+        .join()
+        .expect("spike thread panicked")
+        .replace(&root_prefix, "");
     match out {
         Some(p) => std::fs::write(&p, text).expect("write report"),
         None => print!("{text}"),
