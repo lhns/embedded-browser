@@ -1,6 +1,6 @@
 # 0003. Core API on a single DOM thread
 
-Status: Proposed (becomes Accepted in M1)
+Status: Proposed (becomes Accepted in M1; M0 found Blitz exposes restyle damage, see ADR 0002)
 Date: 2026-11-27
 
 ## Context
@@ -17,4 +17,4 @@ The core must run on a device with one engine thread and no blocking I/O in the 
 ## Consequences
 - JS (v2) plugs in through the sink and script hook without breaking the API.
 - No locking in the engine; slow rasterization is bounded per tick.
-- Blitz has no damage tracking, so M0 checks what damage source exists.
+- Damage comes from Blitz restyle damage plus an old/new layout-bounds diff (M0 finding).

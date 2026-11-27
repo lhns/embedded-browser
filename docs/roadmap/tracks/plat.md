@@ -10,13 +10,16 @@ Scope: ESP adapters and board firmware.
 ```mermaid
 flowchart TB
     plat_boards_p4_first{{"✔ ESP32-P4 first, then<br/>S3"}}
+    plat_defect_s3_paint_crash>"⚠ S3 crash in first<br/>paint"]
     plat_h1_p4_gate[/"⛔ H1 ESP32-P4 hardware<br/>gate"/]
     plat_h2_s3_gate[/"⛔ H2 ESP32-S3 hardware<br/>gate"/]
     plat_m2_p4_firmware["⛔ M2 P4 firmware"]
     plat_m3_s3_firmware["⛔ M3 S3 firmware"]
-    plat_boards_p4_first ~~~ plat_m2_p4_firmware
-    plat_h1_p4_gate ~~~ plat_m3_s3_firmware
+    plat_boards_p4_first ~~~ plat_h2_s3_gate
+    plat_defect_s3_paint_crash ~~~ plat_m2_p4_firmware
+    plat_h1_p4_gate ~~~ plat_m2_p4_firmware
     plat_h2_s3_gate ~~~ plat_m3_s3_firmware
+    plat_m2_p4_firmware ~~~ plat_m3_s3_firmware
     plat_h1_p4_gate --> plat_m2_p4_firmware
     plat_h2_s3_gate --> plat_m3_s3_firmware
     classDef vsucc fill:#2e9e4f,stroke:#1b6b34,color:#fff
@@ -34,6 +37,7 @@ flowchart TB
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
     class plat_boards_p4_first decided
+    class plat_defect_s3_paint_crash finding
     class plat_h1_p4_gate,plat_h2_s3_gate,plat_m2_p4_firmware,plat_m3_s3_firmware blocked
 ```
 <!-- END GENERATED: track-plat -->
@@ -48,6 +52,7 @@ flowchart TB
 | `plat-h2-s3-gate` | H2 ESP32-S3 hardware gate | experiment | hardware | blocked | unrated |  |  | eng-blitz-builds-esp |  |  |  |  |
 | `plat-m2-p4-firmware` | M2 P4 firmware | feature | hardware | blocked | unrated |  |  | plat-h1-p4-gate, eng-m1-host-mvp |  |  |  |  |
 | `plat-m3-s3-firmware` | M3 S3 firmware | feature | hardware | blocked | unrated |  |  | plat-h2-s3-gate, eng-m1-host-mvp |  |  |  |  |
+| `plat-defect-s3-paint-crash` | S3 crash in first paint | defect | docker | next | unrated | 2026-11-27 |  | eng-blitz-builds-esp |  |  |  | docs/m0/emulation-results.md |
 
 ### Details per node
 
@@ -58,4 +63,5 @@ flowchart TB
 | `plat-h2-s3-gate` | H2 ESP32-S3 hardware gate |  |  | Once an S3 board arrives, check that atomics in external memory work and repeat the speed tests. | Done when: a tiny firmware exercising Arc and atomics in PSRAM passes on an S3, and the H1 metrics are measured at 800x480. Run by the owner. |  |  |  |  |
 | `plat-m2-p4-firmware` | M2 P4 firmware |  |  | Browser firmware for the ESP32-P4 board with display, touch, Wi-Fi and HTTPS. | Done when: Wikipedia renders on the P4 hardware and scrolls by touch (DSI, GT911, Wi-Fi via esp-hosted on the C6, HTTPS). |  |  |  |  |
 | `plat-m3-s3-firmware` | M3 S3 firmware |  |  | Browser firmware for the two ESP32-S3 boards. | Done when: pages render and scroll by touch on the S3-BOX-3 (SPI) and then the 7-inch RGB board. If H2 fails on atomics, the S3 gets the fallback engine. |  |  |  |  |
+| `plat-defect-s3-paint-crash` | S3 crash in first paint |  |  | On the emulated S3, hello-Blitz parses, styles and lays out the page, then crashes in vello_cpu's alpha compositing on the first paint. | Done when: the cause (QEMU artefact or real Xtensa bug) is known with evidence, and fixed or worked around so the S3 QEMU hello-Blitz run prints its paint phase. |  |  |  |  |
 <!-- END GENERATED: table-plat -->

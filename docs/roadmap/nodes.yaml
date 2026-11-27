@@ -223,26 +223,26 @@
   title: "M0 go or no-go"
   track: eng
   kind: owner-decision
-  state: blocked
+  state: done
   outcome: n/a
-  evidence: []
+  evidence: ["docs/adr/0002-blitz-engine-stack.md", "docs/m0/esp-build-results.md", "docs/m0/host-results.md"]
   verdict_quote: ""
   headline: ""
   depends_on: [eng-blitz-builds-esp, eng-peak-heap]
   replaced_by: []
   lane: owner
-  start: ""
-  end: ""
+  start: 2026-11-27
+  end: 2026-11-27
   folded: []
   overview: true
-  plain: "The owner decides from the host numbers whether to build on Blitz, switch to a smaller engine, or stop."
+  plain: "The owner chose go with Blitz: it builds for the P4 with two shallow shims, the image is 6.3 MiB and peak heap is at most 10.5 MB."
   notes: "Done when: the owner has read the M0 numbers (build, image size, peak heap) and chosen go, fallback or stop. Go means M1 starts; fallback or stop always comes back to the owner."
 
 - id: eng-m1-host-mvp
   title: "M1 host MVP"
   track: eng
   kind: feature
-  state: blocked
+  state: next
   outcome: unrated
   evidence: []
   verdict_quote: ""
@@ -369,7 +369,7 @@
   folded: []
   overview: false
   plain: "Check that the QuickJS-ng JavaScript engine fits and runs fast enough on the P4."
-  notes: "Done when: QuickJS-ng runs on the P4 via rquickjs (fallback: Espressif component via bindgen) with flash cost <=1.5MB, idle RAM <=1MB, and a 100KB script parsed in <=300ms."
+  notes: "Done when: QuickJS-ng runs on the P4 via rquickjs (fallback: Espressif component via bindgen) with flash cost <=1.5MB, idle RAM <=1MB, a 100KB script cold-loaded in <=3s, and loaded from cached bytecode (BlobStore) in <=300ms (split target, owner decision 2026-11-27)."
 
 - id: js-j2-minimal-dom-apis
   title: "J2 minimal DOM and web APIs"
@@ -446,3 +446,60 @@
   overview: false
   plain: "Contribute shadow DOM support to Blitz, the path to running Home Assistant on the device. Tracked, not planned."
   notes: "Done when: Blitz upstream supports shadow DOM and custom elements well enough for Home Assistant's frontend."
+
+- id: eng-fork-atomic-u64
+  title: "Fork fix for 64-bit atomics"
+  track: eng
+  kind: feature
+  state: parked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [eng-blitz-builds-esp]
+  replaced_by: []
+  lane: owner
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "blitz-dom and anyrender use 64-bit atomics everywhere; patching our own fork of them would let us drop the custom target specs."
+  notes: "Done when: blitz-dom (src/tree.rs) and anyrender (src/pattern.rs) in our fork (git fork + [patch.crates-io], fixed revision) build on targets without 64-bit atomics and the max-atomic-width target specs are removed. Nothing is filed upstream (owner decision 2026-11-27). Only worth doing if the target specs cause trouble."
+
+- id: eng-fork-memmap-shim
+  title: "Fork fix for font file mapping"
+  track: eng
+  kind: feature
+  state: parked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [eng-blitz-builds-esp]
+  replaced_by: []
+  lane: owner
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "The font library maps font files into memory, which ESP-IDF can't do; we swap in a stand-in that reads them instead."
+  notes: "Done when: our fork of fontique works without memmap2 on ESP-IDF and boards/patches/memmap2 is removed. Nothing is filed upstream (owner decision 2026-11-27). Only worth doing if the stand-in causes trouble."
+
+- id: plat-defect-s3-paint-crash
+  title: "S3 crash in first paint"
+  track: plat
+  kind: defect
+  state: next
+  outcome: unrated
+  evidence: ["docs/m0/emulation-results.md"]
+  verdict_quote: ""
+  headline: ""
+  depends_on: [eng-blitz-builds-esp]
+  replaced_by: []
+  lane: docker
+  start: 2026-11-27
+  end: ""
+  folded: []
+  overview: false
+  plain: "On the emulated S3, hello-Blitz parses, styles and lays out the page, then crashes in vello_cpu's alpha compositing on the first paint."
+  notes: "Done when: the cause (QEMU artefact or real Xtensa bug) is known with evidence, and fixed or worked around so the S3 QEMU hello-Blitz run prints its paint phase."

@@ -13,13 +13,25 @@ flowchart TB
     eng_blitz_builds_esp[/"✔ Blitz builds for<br/>ESP32 targets"/]
     eng_peak_heap[/"✔ Measure peak heap by<br/>category"/]
     eng_raster_estimate[/"✔ Estimate raster<br/>speed"/]
-    eng_m1_host_mvp["⛔ M1 host MVP"]
+    eng_m0_go_no_go{{"✔ M0 go or no-go"}}
+    eng_m1_host_mvp["○ M1 host MVP"]
     eng_shadow_dom_upstream["⏸ Shadow DOM in Blitz"]
+    eng_fork_atomic_u64["⏸ Fork fix for 64-bit<br/>atomics"]
+    eng_fork_memmap_shim["⏸ Fork fix for font<br/>file mapping"]
     eng_std_only_esp_idf ~~~ eng_raster_estimate
-    eng_blitz_builds_esp ~~~ eng_m1_host_mvp
-    eng_peak_heap ~~~ eng_shadow_dom_upstream
-    eng_blitz_builds_esp --> eng_m1_host_mvp
-    eng_peak_heap --> eng_m1_host_mvp
+    eng_blitz_builds_esp ~~~ eng_m0_go_no_go
+    eng_peak_heap ~~~ eng_m0_go_no_go
+    eng_raster_estimate ~~~ eng_m1_host_mvp
+    eng_m0_go_no_go ~~~ eng_shadow_dom_upstream
+    eng_m0_go_no_go ~~~ eng_fork_atomic_u64
+    eng_m1_host_mvp ~~~ eng_fork_memmap_shim
+    eng_shadow_dom_upstream ~~~ eng_fork_memmap_shim
+    eng_fork_atomic_u64 ~~~ eng_fork_memmap_shim
+    eng_blitz_builds_esp --> eng_m0_go_no_go
+    eng_peak_heap --> eng_m0_go_no_go
+    eng_m0_go_no_go --> eng_m1_host_mvp
+    eng_blitz_builds_esp --> eng_fork_atomic_u64
+    eng_blitz_builds_esp --> eng_fork_memmap_shim
     classDef vsucc fill:#2e9e4f,stroke:#1b6b34,color:#fff
     classDef succ fill:#bfe8c8,stroke:#2e9e4f,color:#111
     classDef mixed fill:#ffd37a,stroke:#c98a00,color:#111
@@ -34,10 +46,10 @@ flowchart TB
     classDef decided fill:#ece0f7,stroke:#7b3fb5,stroke-dasharray:2 2,color:#111
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
-    class eng_std_only_esp_idf decided
+    class eng_std_only_esp_idf,eng_m0_go_no_go decided
     class eng_blitz_builds_esp,eng_peak_heap,eng_raster_estimate unrated
-    class eng_m1_host_mvp blocked
-    class eng_shadow_dom_upstream parked
+    class eng_m1_host_mvp next
+    class eng_shadow_dom_upstream,eng_fork_atomic_u64,eng_fork_memmap_shim parked
 ```
 <!-- END GENERATED: track-eng -->
 
@@ -50,10 +62,12 @@ flowchart TB
 | `eng-blitz-builds-esp` | Blitz builds for ESP32 targets | experiment | docker | done | unrated | 2026-11-27 | 2026-11-27 | ci-workspace-skeleton |  |  | Builds for P4 and S3 with two small shims, no Stylo changes; P4 image 5.8 MiB | docs/m0/esp-build-results.md |
 | `eng-peak-heap` | Measure peak heap by category | experiment | host | done | unrated | 2026-11-27 | 2026-11-27 | ci-workspace-skeleton |  |  | 32-bit peak 1.1-3.6 MB on synthetic pages, 10.5 MB on a Wikipedia article (P4 go; S3 only for small pages) | docs/m0/host-results.md |
 | `eng-raster-estimate` | Estimate raster speed | experiment | host | done | unrated | 2026-11-27 | 2026-11-27 | ci-workspace-skeleton |  |  | Provisional P4 full frame ~0.2-0.7 s with vello_cpu, 3.4-4.8 s with tiny-skia on the dashboard; banding works; highlight re-raster ~0.3-0.45 s | docs/m0/host-results.md |
-| `eng-m0-go-no-go` | M0 go or no-go | owner-decision | owner | blocked | n/a |  |  | eng-blitz-builds-esp, eng-peak-heap |  |  |  |  |
-| `eng-m1-host-mvp` | M1 host MVP | feature | host | blocked | unrated |  |  | eng-m0-go-no-go |  |  |  |  |
+| `eng-m0-go-no-go` | M0 go or no-go | owner-decision | owner | done | n/a | 2026-11-27 | 2026-11-27 | eng-blitz-builds-esp, eng-peak-heap |  |  |  | docs/adr/0002-blitz-engine-stack.md; docs/m0/esp-build-results.md; docs/m0/host-results.md |
+| `eng-m1-host-mvp` | M1 host MVP | feature | host | next | unrated |  |  | eng-m0-go-no-go |  |  |  |  |
 | `eng-m1-side-by-side-review` | M1 side-by-side review | owner-decision | owner | blocked | n/a |  |  | eng-m1-host-mvp |  |  |  |  |
 | `eng-shadow-dom-upstream` | Shadow DOM in Blitz | feature | host | parked | unrated |  |  |  |  |  |  |  |
+| `eng-fork-atomic-u64` | Fork fix for 64-bit atomics | feature | owner | parked | unrated |  |  | eng-blitz-builds-esp |  |  |  |  |
+| `eng-fork-memmap-shim` | Fork fix for font file mapping | feature | owner | parked | unrated |  |  | eng-blitz-builds-esp |  |  |  |  |
 
 ### Details per node
 
@@ -63,8 +77,10 @@ flowchart TB
 | `eng-blitz-builds-esp` | Blitz builds for ESP32 targets |  | Builds for P4 and S3 with two small shims, no Stylo changes; P4 image 5.8 MiB | Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads. | Done when: hello-Blitz compiles for the P4 (and S3, compile-only), 64-bit atomics availability is recorded, sequential Stylo is confirmed thread-free, the P4 image size is recorded against the go (<=8MB), fallback (8-14MB) and stop (>14MB) thresholds, and a hello firmware that prints timings over serial is ready for H1. Result: P4 and S3 (compile-only) build with Blitz =0.3.0-beta.6 unmodified, using a memmap2 stand-in and a target spec with 64-bit atomics as ESP-IDF libcalls; neither target has 64-bit atomics natively. P4 app image 6,081,152 bytes (go band), S3 6,336,288. Sequential Stylo spawned no threads on a Linux host run. Open: S3 Arc/atomics on PSRAM are unsafe with the stock Xtensa target (inline S32C1I), so H2 must check it; P4 images default to chip rev v3.01+. |  |  |  |  |
 | `eng-peak-heap` | Measure peak heap by category |  | 32-bit peak 1.1-3.6 MB on synthetic pages, 10.5 MB on a Wikipedia article (P4 go; S3 only for small pages) | Measure how much memory the engine needs for each corpus page, split by what uses it. | Done when: peak heap on a 32-bit host (i686 or wasm32) is recorded per category (DOM/style/layout, text/glyphs, images, net) for the corpus, against go (<=12MB), fallback (12-20MB) and stop (>20MB); the S3 8MB tier needs <=4MB. Home Assistant is a static HA-like page or post-script DOM snapshot. Result: wasm32-wasip1 (i686-msvc fails an anyrender size assert), engine + 32px vello_cpu bands: dashboard 1.10, article 3.58, links 1.72, HN 2.13, Wikipedia with images 10.52 MB (go, ~1 MB margin after allocator overhead); a full RGBA frame adds ~3 MB, which puts Wikipedia at 13.4 MB (fallback). Sequential styling spawns no threads. |  |  |  |  |
 | `eng-raster-estimate` | Estimate raster speed |  | Provisional P4 full frame ~0.2-0.7 s with vello_cpu, 3.4-4.8 s with tiny-skia on the dashboard; banding works; highlight re-raster ~0.3-0.45 s | Time the two software rasterizers on the host to guess how fast the P4 will draw. | Done when: vello_cpu and tiny-skia are timed with scalar code paths and the size-build profile, derated by a CoreMark ratio as a provisional estimate; banded paint_scene is verified and any damage source in Blitz is identified. Result: scalar via wasm32 (no simd128) x6.9 CoreMark derate (host 8625, P4 single core assumed 1245 at 360 MHz), PSRAM penalty not modelled. Banding via viewport scroll matches the full frame (vello_cpu <=6 px). RestyleDamage (also set by text edits and insertions) readable between resolve_stylist and resolve, but relayout side effects need a bounds diff; highlight re-raster estimate ~0.27-0.45 s, over the H1 fallback limit. |  |  |  |  |
-| `eng-m0-go-no-go` | M0 go or no-go |  |  | The owner decides from the host numbers whether to build on Blitz, switch to a smaller engine, or stop. | Done when: the owner has read the M0 numbers (build, image size, peak heap) and chosen go, fallback or stop. Go means M1 starts; fallback or stop always comes back to the owner. |  |  |  |  |
+| `eng-m0-go-no-go` | M0 go or no-go |  |  | The owner chose go with Blitz: it builds for the P4 with two shallow shims, the image is 6.3 MiB and peak heap is at most 10.5 MB. | Done when: the owner has read the M0 numbers (build, image size, peak heap) and chosen go, fallback or stop. Go means M1 starts; fallback or stop always comes back to the owner. |  |  |  |  |
 | `eng-m1-host-mvp` | M1 host MVP |  |  | The core engine and simulator render the test pages on a PC, and taps follow links. | Done when: the core and simulator render the corpus, taps navigate, the capped-heap test passes, and each page has a reference screenshot from a real browser at the same viewport with JS off. |  |  |  |  |
 | `eng-m1-side-by-side-review` | M1 side-by-side review |  |  | The owner compares our rendering with a real browser and signs off. | Done when: the owner has reviewed engine and reference screenshots side by side and signed off; the goldens are then frozen for regression. |  |  |  |  |
 | `eng-shadow-dom-upstream` | Shadow DOM in Blitz |  |  | Contribute shadow DOM support to Blitz, the path to running Home Assistant on the device. Tracked, not planned. | Done when: Blitz upstream supports shadow DOM and custom elements well enough for Home Assistant's frontend. |  |  |  |  |
+| `eng-fork-atomic-u64` | Fork fix for 64-bit atomics |  |  | blitz-dom and anyrender use 64-bit atomics everywhere; patching our own fork of them would let us drop the custom target specs. | Done when: blitz-dom (src/tree.rs) and anyrender (src/pattern.rs) in our fork (git fork + [patch.crates-io], fixed revision) build on targets without 64-bit atomics and the max-atomic-width target specs are removed. Nothing is filed upstream (owner decision 2026-11-27). Only worth doing if the target specs cause trouble. |  |  |  |  |
+| `eng-fork-memmap-shim` | Fork fix for font file mapping |  |  | The font library maps font files into memory, which ESP-IDF can't do; we swap in a stand-in that reads them instead. | Done when: our fork of fontique works without memmap2 on ESP-IDF and boards/patches/memmap2 is removed. Nothing is filed upstream (owner decision 2026-11-27). Only worth doing if the stand-in causes trouble. |  |  |  |  |
 <!-- END GENERATED: table-eng -->
