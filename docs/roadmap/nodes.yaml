@@ -185,16 +185,16 @@
   title: "Check ESP32 emulation options"
   track: ci
   kind: experiment
-  state: next
+  state: done
   outcome: unrated
-  evidence: []
+  evidence: ["docs/m0/emulation-results.md", "scripts/qemu-s3-screenshot.sh", "boards/s3-qemu-test"]
   verdict_quote: ""
-  headline: ""
+  headline: "S3 QEMU boots with octal PSRAM and matches a golden screenshot; P4 boots a C hello world in QEMU 9.2.2 (no display); touch is not emulated in QEMU"
   depends_on: [ci-workspace-skeleton]
   replaced_by: []
   lane: docker
-  start: ""
-  end: ""
+  start: 2026-11-27
+  end: 2026-11-27
   folded: []
   overview: false
   plain: "See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3."

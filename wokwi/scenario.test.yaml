@@ -1,0 +1,20 @@
+# DRAFT, not run in CI yet. Needs a firmware that drives ILI9341 over SPI and reads FT6206 over I2C
+# (M3 BOX-3 firmware). Part ids match diagram.json.
+name: "tap navigates"
+version: 1
+steps:
+  - wait-serial: "READY"
+  - take-screenshot:
+      part-id: lcd1
+      save-to: "screenshots/page.png"
+      compare-with: "golden/page.png"
+  # FT6206 reports in controller space; (0,0) is the bottom-right on ILI9341+FT6206.
+  - touch:
+      part-id: lcd1
+      x: 120
+      y: 160
+      duration: 100ms
+  - wait-serial: "NAVIGATED"
+  - take-screenshot:
+      part-id: lcd1
+      save-to: "screenshots/after-tap.png"

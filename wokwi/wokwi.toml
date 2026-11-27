@@ -1,0 +1,5 @@
+# DRAFT: the firmware path is a placeholder until a BOX-3-like firmware exists.
+[wokwi]
+version = 1
+firmware = "../boards/s3-box3/target/xtensa-esp32s3-espidf/release/s3-box3.bin"
+elf = "../boards/s3-box3/target/xtensa-esp32s3-espidf/release/s3-box3"
