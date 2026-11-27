@@ -115,7 +115,9 @@ Cheap wins if the budget ever gets tight:
 - harfrust's complex-script shapers could go if Blitz lets them be gated.
 
 ### Build time
-On a 20-core Docker VM, with the target dir on a Windows bind mount, a cold build takes 30 min. The fat-LTO relink after a source change takes about 9 min.
+- **Local:** on a 20-core Docker VM, with the target dir on a Windows bind mount, a cold build takes 30 min. The fat-LTO relink after a source change takes about 9 min.
+- **CI:** the `cross-p4` job on a GitHub runner took 15 min in total. That covers the image build, about 8 min, and `cargo build`, 4 min 37 s.
+- **Reproducible:** the CI app image was byte-for-byte the same size, 6,081,152 bytes.
 
 ## S3 compile-only build
 
@@ -161,7 +163,7 @@ This section is for when a P4 board arrives.
 **1. Chip revision: check it first.**
 - ESP-IDF v5.5 builds for **v3.01+ silicon** by default (`CONFIG_ESP32P4_REV_MIN_301`). Such an image does not boot on v0.x/v1.x chips, and a v1 image does not boot on v3.
 - Run `espflash board-info` to read the revision.
-- For v1.x, add the opt-in defaults file. This configuration compiles but is untested:
+- For v1.x, add the opt-in defaults file. It builds, with an image of 6,079,440 bytes, and the generated sdkconfig has `ESP32P4_SELECTS_REV_LESS_V3=y`, `REV_MIN_FULL=1` and `SPIRAM_SPEED_200M`. It has not been booted:
   `-e ESP_IDF_SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.p4-rev1"`
 
 **2. Applied config.** I checked the generated `sdkconfig`. It has:
