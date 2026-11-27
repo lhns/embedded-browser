@@ -181,10 +181,6 @@ flowchart TB
 
 - `eng-m1-touch-events-forms`: M1 touch, events and forms
 - `eng-m1-scroll-strip-cache`: M1 scroll strip cache
-
-**docker**
-
-- `plat-defect-s3-paint-crash`: S3 crash in first paint
 <!-- END GENERATED: ready-now -->
 
 ## Running
@@ -210,7 +206,7 @@ _None._
 <!-- BEGIN GENERATED: timeline -->
 [The timeline](roadmap/timeline.md) shows every dated node as a bar from its start to its end.
 
-Generated on 2026-11-27.
+Generated on 2026-11-28.
 <!-- END GENERATED: timeline -->
 
 ## Done, by month
@@ -243,7 +239,7 @@ Generated on 2026-11-27.
 Each track has its own page with its tree, node table and per-node details.
 
 - [eng - engine](roadmap/tracks/eng.md): 14 nodes (6 done, 3 next, 1 blocked, 3 parked, 1 abandoned)
-- [plat - platform](roadmap/tracks/plat.md): 6 nodes (1 done, 1 next, 4 blocked)
+- [plat - platform](roadmap/tracks/plat.md): 6 nodes (1 done, 1 in progress, 4 blocked)
 - [js - JavaScript](roadmap/tracks/js.md): 6 nodes (2 done, 4 parked)
 - [ci - build and test](roadmap/tracks/ci.md): 2 nodes (2 done)
 - [doc - documentation](roadmap/tracks/doc.md): 3 nodes (3 done)

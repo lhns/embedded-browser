@@ -34,6 +34,8 @@ use image as _;
 fn main() {
     #[cfg(target_os = "espidf")]
     esp_idf_sys::link_patches();
+    #[cfg(all(target_os = "espidf", feature = "qemu"))]
+    platform::qemu_psram();
 
     println!("eb-hello: {WIDTH}x{HEIGHT}, page {} bytes", PAGE.len());
     platform::report("boot");
@@ -209,6 +211,30 @@ mod platform {
             let mut cfg = sys::esp_pthread_get_default_config();
             cfg.stack_alloc_caps = sys::MALLOC_CAP_SPIRAM | sys::MALLOC_CAP_8BIT;
             sys::esp!(sys::esp_pthread_set_cfg(&cfg)).expect("esp_pthread_set_cfg");
+        }
+    }
+
+    /// QEMU's esp32p4 has a plain-RAM PSRAM window at 0x48000000 but fails the chip probe, so
+    /// ESP-IDF boots without PSRAM (SPIRAM_IGNORE_NOTFOUND). Add 32 MB of the window to the heap
+    /// and turn on the malloc policy that esp_psram_init() would have enabled.
+    #[cfg(feature = "qemu")]
+    pub fn qemu_psram() {
+        // esp_heap_caps_init.h is not in esp-idf-sys's bindings.
+        unsafe extern "C" {
+            fn heap_caps_add_region(start: isize, end: isize) -> sys::esp_err_t;
+        }
+        const BASE: isize = 0x4800_0000;
+        const SIZE: isize = 32 << 20;
+        // SAFETY: only built for the emulator, where this window is RAM nothing else uses.
+        unsafe {
+            if sys::heap_caps_get_total_size(sys::MALLOC_CAP_SPIRAM) == 0 {
+                sys::esp!(heap_caps_add_region(BASE, BASE + SIZE)).expect("add PSRAM heap");
+                sys::heap_caps_malloc_extmem_enable(sys::CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL as _);
+                println!(
+                    "eb-hello: qemu: added {} MB PSRAM heap at {BASE:#x}",
+                    SIZE >> 20
+                );
+            }
         }
     }
 }

@@ -4,7 +4,7 @@
 
 [Back to the page](../roadmap.md)
 
-Generated on 2026-11-27. Open bars end on that date.
+Generated on 2026-11-28. Open bars end on that date.
 
 <!-- BEGIN GENERATED: timeline -->
 ```mermaid
@@ -21,7 +21,7 @@ gantt
     M1 render slice :eng_m1_render, 2026-11-27, 2026-11-27
     section plat - platform
     ESP32-P4 first, then S3 :plat_boards_p4_first, 2026-11-27, 2026-11-27
-    S3 crash in first paint :plat_defect_s3_paint_crash, 2026-11-27, 2026-11-27
+    S3 crash in first paint :active, plat_defect_s3_paint_crash, 2026-11-27, 2026-11-28
     section js - JavaScript
     No JavaScript in v1 :js_no_js_in_v1, 2026-11-27, 2026-11-27
     Run corpus scripts in QuickJS :js_host_spike, 2026-11-27, 2026-11-27

@@ -565,9 +565,9 @@
   title: "S3 crash in first paint"
   track: plat
   kind: defect
-  state: next
+  state: in-progress
   outcome: unrated
-  evidence: ["docs/m0/emulation-results.md"]
+  evidence: ["docs/m0/emulation-results.md", "docs/m0/esp-build-results.md"]
   verdict_quote: ""
   headline: ""
   depends_on: [eng-blitz-builds-esp]
@@ -578,4 +578,4 @@
   folded: []
   overview: false
   plain: "On the emulated S3, hello-Blitz parses, styles and lays out the page, then crashes in vello_cpu's alpha compositing on the first paint."
-  notes: "Done when: the cause (QEMU artefact or real Xtensa bug) is known with evidence, and fixed or worked around so the S3 QEMU hello-Blitz run prints its paint phase."
+  notes: "Done when: the cause (QEMU artefact or real Xtensa bug) is known with evidence, and fixed or worked around so the S3 QEMU hello-Blitz run prints its paint phase. Cause found (2026-11-28): an Xtensa LLVM bug (espressif/llvm-project#140, open). Frames with locals aligned above 16 realign SP with a plain add after entry and then read stack arguments from the moved SP. fearless_simd's align(32/64) vector types trigger it in 4 vello_cpu functions, and indexed_fill passed a garbage alphas pointer. Not QEMU, not the heap. Capping fearless_simd's alignment to 16 on Xtensa, tested via an uncommitted patch, gives 0 realigning functions and a full S3 QEMU run with the host checksum. Open: our fearless_simd fork with that change. Same PR: malloc threshold 4096 -> 256 with a 96 KB internal reserve, the P4 QEMU hello-Blitz run, icount timing, and the S3 software-atomics target."

@@ -1,0 +1,4 @@
+# Emulator-only (P4 QEMU), together with the `qemu` cargo feature; see scripts/qemu-p4-hello-blitz.sh.
+# Use: ESP_IDF_SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.qemu"
+# QEMU's esp32p4 does not answer the PSRAM chip probe: boot on without PSRAM, main() adds the window.
+CONFIG_SPIRAM_IGNORE_NOTFOUND=y

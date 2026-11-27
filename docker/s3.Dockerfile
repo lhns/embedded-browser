@@ -22,6 +22,13 @@ RUN curl -fsSL -o /tmp/qemu.tar.xz \
     && mkdir -p /opt/qemu && tar -xJf /tmp/qemu.tar.xz -C /opt/qemu --strip-components=1 \
     && rm /tmp/qemu.tar.xz
 ENV PATH="/opt/qemu/bin:${PATH}"
+# The RISC-V build of the same release has the esp32p4 machine (scripts/qemu-p4-hello-blitz.sh).
+# It needs the same runtime libs, so the P4 serial smoke test runs in this image too.
+RUN curl -fsSL -o /tmp/qemu.tar.xz \
+      "https://github.com/espressif/qemu/releases/download/${QEMU_TAG}/qemu-riscv32-softmmu-${QEMU_VER}-x86_64-linux-gnu.tar.xz" \
+    && mkdir -p /opt/qemu-riscv32 && tar -xJf /tmp/qemu.tar.xz -C /opt/qemu-riscv32 --strip-components=1 \
+    && rm /tmp/qemu.tar.xz \
+    && ln -s /opt/qemu-riscv32/bin/qemu-system-riscv32 /usr/local/bin/qemu-system-riscv32
 
 # /cache holds build state (target dir, embuild tools, cargo registry) as named volumes so that
 # nothing is built on a bind mount (slow on Windows, path issues).
