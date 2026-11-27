@@ -1,0 +1,9 @@
+[package]
+name = "embedded-browser"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Web renderer for ESP32 touch panels, built on Servo components via Blitz"
+publish = true

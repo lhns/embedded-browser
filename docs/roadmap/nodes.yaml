@@ -1,0 +1,448 @@
+- id: doc-name-embedded-browser
+  title: "Name the project"
+  track: doc
+  kind: owner-decision
+  state: done
+  outcome: n/a
+  evidence: ["planning session 2026-11-27"]
+  verdict_quote: ""
+  headline: ""
+  depends_on: []
+  replaced_by: []
+  lane: owner
+  start: 2026-11-27
+  end: 2026-11-27
+  folded: []
+  overview: false
+  plain: "The owner chose the name embedded-browser."
+
+- id: eng-std-only-esp-idf
+  title: "Target ESP-IDF std only"
+  track: eng
+  kind: owner-decision
+  state: done
+  outcome: n/a
+  evidence: ["docs/adr/0001-std-only-esp-idf-targets.md"]
+  verdict_quote: ""
+  headline: ""
+  depends_on: []
+  replaced_by: []
+  lane: owner
+  start: 2026-11-27
+  end: 2026-11-27
+  folded: []
+  overview: true
+  plain: "All Servo parts need std, so the engine runs on ESP-IDF std boards only; no_std chips are out."
+
+- id: js-no-js-in-v1
+  title: "No JavaScript in v1"
+  track: js
+  kind: owner-decision
+  state: done
+  outcome: n/a
+  evidence: ["docs/adr/0004-js-hybrid-strategy.md"]
+  verdict_quote: ""
+  headline: ""
+  depends_on: []
+  replaced_by: []
+  lane: owner
+  start: 2026-11-27
+  end: 2026-11-27
+  folded: []
+  overview: true
+  plain: "Version 1 renders pages without running scripts; JavaScript is a parallel track."
+
+- id: plat-boards-p4-first
+  title: "ESP32-P4 first, then S3"
+  track: plat
+  kind: owner-decision
+  state: done
+  outcome: n/a
+  evidence: ["planning session 2026-11-27"]
+  verdict_quote: ""
+  headline: ""
+  depends_on: []
+  replaced_by: []
+  lane: owner
+  start: 2026-11-27
+  end: 2026-11-27
+  folded: []
+  overview: true
+  plain: "The ESP32-P4 boards come first, then the two ESP32-S3 boards."
+
+- id: doc-public-repo
+  title: "Make the repository public"
+  track: doc
+  kind: owner-decision
+  state: done
+  outcome: n/a
+  evidence: ["docs/adr/0005-licensing.md"]
+  verdict_quote: ""
+  headline: ""
+  depends_on: []
+  replaced_by: []
+  lane: owner
+  start: 2026-11-27
+  end: 2026-11-27
+  folded: []
+  overview: false
+  plain: "The repository is public under MIT OR Apache-2.0, so test pages must be safe to publish."
+
+- id: doc-corpus-choice
+  title: "Choose the test page corpus"
+  track: doc
+  kind: owner-decision
+  state: done
+  outcome: n/a
+  evidence: ["docs/adr/0005-licensing.md"]
+  verdict_quote: ""
+  headline: ""
+  depends_on: []
+  replaced_by: []
+  lane: owner
+  start: 2026-11-27
+  end: 2026-11-27
+  folded: []
+  overview: false
+  plain: "Test pages are Home Assistant-like, server-rendered sites and a simple custom dashboard."
+
+- id: ci-workspace-skeleton
+  title: "Workspace skeleton"
+  track: ci
+  kind: tooling
+  state: done
+  outcome: unrated
+  evidence: ["initial commit"]
+  verdict_quote: ""
+  headline: ""
+  depends_on: []
+  replaced_by: []
+  lane: host
+  start: 2026-11-27
+  end: 2026-11-27
+  folded: []
+  overview: true
+  plain: "Empty Cargo workspace, ADRs 0001-0006, this roadmap and a first CI workflow."
+
+- id: eng-blitz-builds-esp
+  title: "Blitz builds for ESP32 targets"
+  track: eng
+  kind: experiment
+  state: next
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [ci-workspace-skeleton]
+  replaced_by: []
+  lane: docker
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads."
+  notes: "Done when: hello-Blitz compiles for the P4 (and S3, compile-only), 64-bit atomics availability is recorded, sequential Stylo is confirmed thread-free, the P4 image size is recorded against the go (<=8MB), fallback (8-14MB) and stop (>14MB) thresholds, and a hello firmware that prints timings over serial is ready for H1."
+
+- id: eng-peak-heap
+  title: "Measure peak heap by category"
+  track: eng
+  kind: experiment
+  state: next
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [ci-workspace-skeleton]
+  replaced_by: []
+  lane: host
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "Measure how much memory the engine needs for each corpus page, split by what uses it."
+  notes: "Done when: peak heap on a 32-bit host (i686 or wasm32) is recorded per category (DOM/style/layout, text/glyphs, images, net) for the corpus, against go (<=12MB), fallback (12-20MB) and stop (>20MB); the S3 8MB tier needs <=4MB. Home Assistant is a static HA-like page or post-script DOM snapshot."
+
+- id: eng-raster-estimate
+  title: "Estimate raster speed"
+  track: eng
+  kind: experiment
+  state: next
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [ci-workspace-skeleton]
+  replaced_by: []
+  lane: host
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "Time the two software rasterizers on the host to guess how fast the P4 will draw."
+  notes: "Done when: vello_cpu and tiny-skia are timed with scalar code paths and the size-build profile, derated by a CoreMark ratio as a provisional estimate; banded paint_scene is verified and any damage source in Blitz is identified."
+
+- id: ci-emulation-check
+  title: "Check ESP32 emulation options"
+  track: ci
+  kind: experiment
+  state: next
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [ci-workspace-skeleton]
+  replaced_by: []
+  lane: docker
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3."
+  notes: "Done when: the P4 is tried in QEMU 9.2.2 and Wokwi beta with the result recorded, and an S3 QEMU test pattern with screendump works as fallback."
+
+- id: js-host-spike
+  title: "Run corpus scripts in QuickJS"
+  track: js
+  kind: experiment
+  state: next
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [ci-workspace-skeleton]
+  replaced_by: []
+  lane: host
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "On the host, run the small corpus scripts in QuickJS-ng to learn how much memory and which web APIs they need."
+  notes: "Done when: the custom dashboard, Tasmota, ESPHome v1 and htmx scripts run under a memory cap with a logging stub DOM, with peak heap, parse time and the list of web APIs touched recorded. The Home Assistant bundle is measured for information only."
+
+- id: eng-m0-go-no-go
+  title: "M0 go or no-go"
+  track: eng
+  kind: owner-decision
+  state: blocked
+  outcome: n/a
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [eng-blitz-builds-esp, eng-peak-heap]
+  replaced_by: []
+  lane: owner
+  start: ""
+  end: ""
+  folded: []
+  overview: true
+  plain: "The owner decides from the host numbers whether to build on Blitz, switch to a smaller engine, or stop."
+  notes: "Done when: the owner has read the M0 numbers (build, image size, peak heap) and chosen go, fallback or stop. Go means M1 starts; fallback or stop always comes back to the owner."
+
+- id: eng-m1-host-mvp
+  title: "M1 host MVP"
+  track: eng
+  kind: feature
+  state: blocked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [eng-m0-go-no-go]
+  replaced_by: []
+  lane: host
+  start: ""
+  end: ""
+  folded: []
+  overview: true
+  plain: "The core engine and simulator render the test pages on a PC, and taps follow links."
+  notes: "Done when: the core and simulator render the corpus, taps navigate, the capped-heap test passes, and each page has a reference screenshot from a real browser at the same viewport with JS off."
+
+- id: eng-m1-side-by-side-review
+  title: "M1 side-by-side review"
+  track: eng
+  kind: owner-decision
+  state: blocked
+  outcome: n/a
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [eng-m1-host-mvp]
+  replaced_by: []
+  lane: owner
+  start: ""
+  end: ""
+  folded: []
+  overview: true
+  plain: "The owner compares our rendering with a real browser and signs off."
+  notes: "Done when: the owner has reviewed engine and reference screenshots side by side and signed off; the goldens are then frozen for regression."
+
+- id: plat-h1-p4-gate
+  title: "H1 ESP32-P4 hardware gate"
+  track: plat
+  kind: experiment
+  state: blocked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [eng-blitz-builds-esp]
+  replaced_by: []
+  lane: hardware
+  start: ""
+  end: ""
+  folded: []
+  overview: true
+  plain: "Once a P4 board arrives, flash the hello firmware and measure real speed."
+  notes: "Done when: on a P4 the full frame is <=1s (fallback 1-3s, stop >3s), damage-limited highlight re-raster <=100ms (fallback <=300ms), drag scroll from the strip cache >=20fps (fallback >=10fps), and PSRAM atomics with Stylo work. Raster fallback is the other rasterizer, then simplified paint. Run by the owner."
+
+- id: plat-h2-s3-gate
+  title: "H2 ESP32-S3 hardware gate"
+  track: plat
+  kind: experiment
+  state: blocked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [eng-blitz-builds-esp]
+  replaced_by: []
+  lane: hardware
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "Once an S3 board arrives, check that atomics in external memory work and repeat the speed tests."
+  notes: "Done when: a tiny firmware exercising Arc and atomics in PSRAM passes on an S3, and the H1 metrics are measured at 800x480. Run by the owner."
+
+- id: plat-m2-p4-firmware
+  title: "M2 P4 firmware"
+  track: plat
+  kind: feature
+  state: blocked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [plat-h1-p4-gate, eng-m1-host-mvp]
+  replaced_by: []
+  lane: hardware
+  start: ""
+  end: ""
+  folded: []
+  overview: true
+  plain: "Browser firmware for the ESP32-P4 board with display, touch, Wi-Fi and HTTPS."
+  notes: "Done when: Wikipedia renders on the P4 hardware and scrolls by touch (DSI, GT911, Wi-Fi via esp-hosted on the C6, HTTPS)."
+
+- id: plat-m3-s3-firmware
+  title: "M3 S3 firmware"
+  track: plat
+  kind: feature
+  state: blocked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [plat-h2-s3-gate, eng-m1-host-mvp]
+  replaced_by: []
+  lane: hardware
+  start: ""
+  end: ""
+  folded: []
+  overview: true
+  plain: "Browser firmware for the two ESP32-S3 boards."
+  notes: "Done when: pages render and scroll by touch on the S3-BOX-3 (SPI) and then the 7-inch RGB board. If H2 fails on atomics, the S3 gets the fallback engine."
+
+- id: js-j1-quickjs-on-p4
+  title: "J1 QuickJS on the P4"
+  track: js
+  kind: experiment
+  state: parked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [js-host-spike, plat-h1-p4-gate]
+  replaced_by: []
+  lane: hardware
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "Check that the QuickJS-ng JavaScript engine fits and runs fast enough on the P4."
+  notes: "Done when: QuickJS-ng runs on the P4 via rquickjs (fallback: Espressif component via bindgen) with flash cost <=1.5MB, idle RAM <=1MB, and a 100KB script parsed in <=300ms."
+
+- id: js-j2-minimal-dom-apis
+  title: "J2 minimal DOM and web APIs"
+  track: js
+  kind: feature
+  state: parked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [js-j1-quickjs-on-p4]
+  replaced_by: []
+  lane: host
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "Give scripts a small DOM and the web calls small dashboards use."
+  notes: "Done when: querySelector, attributes, text, classList, style, events, timers, fetch/XHR, WebSocket and EventSource work, unsupported APIs are stubbed and logged, the custom dashboard, Tasmota, ESPHome v1 and htmx pages work, touch-to-pixel p95 is <=100ms and a 24h soak passes."
+
+- id: js-j3-remote-mode
+  title: "J3 remote browser mode"
+  track: js
+  kind: feature
+  state: parked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [js-host-spike]
+  replaced_by: []
+  lane: docker
+  start: ""
+  end: ""
+  folded: []
+  overview: true
+  plain: "Show Home Assistant by streaming a real browser running on a server. This bypasses our renderer."
+  notes: "Done when: a VNC-style client and a companion container (Chromium kiosk, Xvfb, x11vnc, usable as an HA add-on) show HA Lovelace and Grafana with touch-to-visible p95 <=150ms."
+
+- id: js-j4-auto-mode
+  title: "J4 auto local or remote mode"
+  track: js
+  kind: feature
+  state: parked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [js-j2-minimal-dom-apis, js-j3-remote-mode]
+  replaced_by: []
+  lane: host
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "Pick local or remote rendering for each site automatically."
+  notes: "Done when: each origin is routed to local or remote mode based on detected customElements, attachShadow or canvas use."
+
+- id: eng-shadow-dom-upstream
+  title: "Shadow DOM in Blitz"
+  track: eng
+  kind: feature
+  state: parked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: []
+  replaced_by: []
+  lane: host
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "Contribute shadow DOM support to Blitz, the path to running Home Assistant on the device. Tracked, not planned."
+  notes: "Done when: Blitz upstream supports shadow DOM and custom elements well enough for Home Assistant's frontend."

@@ -1,0 +1,27 @@
+# Roadmap config for the tech-tree skill (github.com/lhns/design-skills, skills/tech-tree).
+nodes: docs/roadmap/nodes.yaml
+page: docs/roadmap.md
+
+tracks:
+  eng:  {name: "engine", scope: "parse, style, layout, paint, events"}
+  plat: {name: "platform", scope: "ESP adapters and board firmware"}
+  js:   {name: "JavaScript", scope: "on-device JS and remote mode"}
+  ci:   {name: "build and test", scope: "Docker, emulation, CI, measurement tools"}
+  doc:  {name: "documentation", scope: "README, ADRs, corpus policy"}
+
+kinds:
+  feature: {}
+  experiment: {shape: slant}
+  tooling: {}
+  defect:
+    shape: flag
+    rated: false
+    blocks: false
+  owner-decision:
+    shape: hexagon
+    owner_gate: true
+
+# hardware: needs a real board from the owner
+lanes: [host, docker, hardware, owner]
+
+overview: {min: 6, max: 16}
