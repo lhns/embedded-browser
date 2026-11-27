@@ -1,0 +1,16 @@
+{
+  "url": "http://livingroom.local/",
+  "http": [["/", "", "text/plain", "POST"]],
+  "ws": [],
+  "sse": [
+    ["ping", ""],
+    ["log", "\u001b[0;32m[I][app:029]: Running through setup()...\u001b[0m"],
+    ["log", "\u001b[0;36m[D][sensor:094]: 'Temperature': Sending state 21.50000 °C with 1 decimals of accuracy\nsecond line\u001b[0m"],
+    ["log", "plain line"],
+    ["state", "{\"id\":\"sensor-temperature\",\"value\":21.5,\"state\":\"21.5 °C\"}"],
+    ["state", "{\"name_id\":\"sensor/Humidity\",\"value\":45,\"state\":\"45 %\"}"],
+    ["state", "{\"id\":\"switch-relay\",\"value\":true,\"state\":\"ON\"}"],
+    ["state", "{\"name_id\":\"light/Desk lamp\",\"state\":\"OFF\"}"],
+    ["state", "{\"id\":\"select-mode\",\"value\":\"Auto\",\"state\":\"Auto\"}"]
+  ]
+}

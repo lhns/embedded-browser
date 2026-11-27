@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- Synthetic petite-vue panel. petite-vue.iife.js is petite-vue 0.4.1 (MIT, see LICENSE). -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>petite-vue panel</title>
+  <script src="petite-vue.iife.js" defer init></script>
+</head>
+<body>
+  <div v-scope="{ count: 0, lights: [{ name: 'Hall', on: false }, { name: 'Desk', on: true }], temp: 20.5 }">
+    <p>Count: {{ count }}</p>
+    <button @click="count++">Add</button>
+    <ul>
+      <li v-for="l in lights" :key="l.name" :class="{ on: l.on }">
+        {{ l.name }}: <span v-if="l.on">on</span><span v-else>off</span>
+        <button @click="l.on = !l.on">toggle</button>
+      </li>
+    </ul>
+    <input v-model="temp" type="number">
+    <p v-show="temp > 25">Too warm</p>
+  </div>
+</body>
+</html>

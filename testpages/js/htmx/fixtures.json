@@ -1,0 +1,11 @@
+{
+  "url": "http://garage.local/",
+  "http": [
+    ["/status", "<b>Door closed</b>, 18.2 °C", "text/html", "GET"],
+    ["/door/toggle", "<p>Swapped by htmx: door opening</p><div id=\"alerts\" hx-swap-oob=\"true\">Door moving</div>", "text/html", "POST"],
+    ["/details", "<ul id=\"details\"><li>Battery 87%</li><li>Last opened 07:42</li></ul>", "text/html", "GET"],
+    ["/setpoint", "<p>Setpoint saved</p>", "text/html", "POST"]
+  ],
+  "ws": [],
+  "sse": []
+}
