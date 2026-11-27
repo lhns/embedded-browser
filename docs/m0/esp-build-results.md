@@ -9,6 +9,7 @@ Roadmap node `eng-blitz-builds-esp`. Measured on 2026-11-27.
 | Builds for P4 (S3 compile-only) | Yes. Needs one small dependency stand-in (memmap2) and a custom target spec (64-bit atomics as libcalls). **No change to Stylo or Blitz.** S3 compiles and links with the same shims (6.04 MiB image). | **needs patches** (shallow) |
 | P4 image size | **6,081,152 bytes (5.80 MiB)**, 41% of the 14 MiB factory partition | **go** (≤8 MB) |
 
+- **By the table's letter, the build row is in the "needs patches" (fallback) column, so it goes back to the owner.** My reading: the shims are build-level and touch neither Stylo nor Blitz.
 - The size is a clear go.
 - Strictly, the build lands in the "needs patches" band. The patches are build-level shims, not Stylo patching: about 40 lines, all listed under [What is not stock](#what-is-not-stock).
 - The plan's "deep Stylo patching" stop case did not happen. Stylo 0.24 compiles unmodified for both targets.
@@ -36,6 +37,7 @@ Each board crate ships a target spec under `targets/`, named like the stock targ
 - LLVM then lowers 64-bit atomics to `__atomic_*_8` libcalls.
 - ESP-IDF already implements those calls for every chip without native 64-bit atomics, with a lock (`components/newlib/src/stdatomic.c`, `ATOMIC_FUNCTIONS(8, ...)` under `!HAS_ATOMICS_64`).
 - 32-bit and smaller atomics are unchanged and stay native.
+- The link resolves them to ESP-IDF: both ELFs define `__atomic_load_8`, `_store_8`, `_fetch_add_8`, `_fetch_or_8` and `_compare_exchange_8` (`T`, in IRAM).
 - Cargo needs `-Zjson-target-spec`, which is set in `.cargo/config.toml`.
 - The stem stays `riscv32imafc-esp-espidf`, so esp-idf-sys and embuild see the usual target name.
 
@@ -101,7 +103,7 @@ This is `nm -S --size-sort -C` by crate (`scripts/size-attribution.py`). Inlined
 
 About 900 KB of `.flash.rodata` has no symbol, because LTO merges constants into anonymous blocks. Sampling the blocks shows four kinds of content:
 - About 330 KB of strings: CSS property names, atom tables and panic messages. That includes about 48 KB of panic source paths.
-- ICU segmenter and normalizer data. The `cjdict`/`burmesedict` names are there, but the dictionaries themselves are not compiled in.
+- ICU segmenter and normalizer data. ICU code is 45 KB; its data can't be separated from other constants under fat LTO.
 - The two fonts and the page, about 42 KB.
 - Lookup tables.
 
@@ -134,7 +136,7 @@ The S3 build is the same firmware, with nothing changed. Build details:
 
 - **Code split:** the same as on the P4, about 4% bigger. Stylo is 1503 KB of text, fonts and text 776 KB, std 724 KB, Blitz 432 KB, raster 414 KB, Taffy 282 KB.
 - **The attribution script's rodata column is wrong on Xtensa:** nm reports DROM symbols as data there. Only the text column is meaningful for the S3.
-- **This proves compile and link only.** The stock S3 target emits inline S32C1I for 32-bit atomics. So `Arc` and `Mutex` on PSRAM-resident data are unsafe on the S3 hardware; see the doc lookups below.
+- **This proves compile and link only.** The stock S3 target emits inline S32C1I for 32-bit atomics. `objdump -d` of the S3 ELF finds **2,787 `s32c1i` instructions, 2,764 of them in Rust functions** and 23 in ESP-IDF C. So `Arc` and `Mutex` on PSRAM-resident data are unsafe on the S3 hardware; see the doc lookups below.
 - **H2 should run this image's atomics check.** It tests exactly that case. If it fails, try a software-atomics target (esp-rs/esp-idf-sys#406) before calling the S3 a fallback-engine board.
 
 ## What is not stock
@@ -166,14 +168,16 @@ This section is for when a P4 board arrives.
 - `SPIRAM=y`, `SPIRAM_SPEED_200M`, `SPIRAM_USE_MALLOC`, `SPIRAM_MALLOC_ALWAYSINTERNAL=4096` and `SPIRAM_ALLOW_STACK_EXTERNAL_MEMORY`;
 - main and pthread stacks of 32 KB, and the engine thread at 512 KB in PSRAM;
 - `ESPTOOLPY_FLASHSIZE=16MB`;
-- the idle-task watchdog off on both cores, because one frame can take seconds.
+- the idle-task watchdog off on both cores (`# CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0/1 is not set`), because one frame can take seconds.
 
-**3. Flash and watch.** Run this from `boards/p4-function-ev`, outside Docker, with the ELF from `out/`:
-`espflash flash --monitor --chip esp32p4 --partition-table partitions.csv out/p4-function-ev-esp32p4/firmware.elf`
+**3. Flash and watch.** Run this from the repo root, outside Docker. `out/` holds the ELF and the bootloader that ESP-IDF built from our sdkconfig; espflash would otherwise flash its bundled bootloader.
+`espflash flash --monitor --chip esp32p4 --flash-size 16mb --bootloader out/p4-function-ev-esp32p4/bootloader.bin --partition-table boards/p4-function-ev/partitions.csv out/p4-function-ev-esp32p4/firmware.elf`
+
+The firmware has never booted on any ESP target, so H1 is its first boot.
 
 **4. Read off H1.**
 - **Full frame.** Read it as `phase style+layout` plus `phase paint (cold)`; the warm repaint shows the steady state.
-- **PSRAM atomics.** The `atomics OK|BROKEN` line answers the H1 row "PSRAM atomics with Stylo". The resolve and paint passes, which are `Arc`-heavy Stylo on PSRAM, finishing at all is the second half of that answer.
+- **PSRAM atomics.** The `atomics OK|BROKEN` line answers the H1 row "PSRAM atomics with Stylo". The line prints the block's address: check that it is in PSRAM (`0x48000000`-`0x4C000000` on the P4), otherwise "OK" proves nothing. The resolve and paint passes, which are `Arc`-heavy Stylo on PSRAM, finishing at all is the second half of that answer.
 - **Threads.** The `tasks` count should stay the same across the engine phases. That confirms on the device that sequential Stylo spawns no threads; the two atomics-check workers have exited by then.
 - **Heap.** The peak is printed per region.
 
@@ -210,7 +214,7 @@ These are the doc lookups the plan asks for before H1. They are from ESP-IDF v5.
   - [esp-rs/esp-idf-sys#406](https://github.com/esp-rs/esp-idf-sys/issues/406) (open, 2026-03-10) says: "Hardware atomics do not work on the s3 and the stock esp32 when emplaced inside PSRAM due to PSRAM/chip hardware limitations / hacks."
     - The issue proposes a JSON target that makes LLVM emit atomic libcalls, which ESP-IDF already implements.
     - It notes upstream would not accept that, because the libcalls take locks.
-  - [esp-rs/esp-idf-sys#400](https://github.com/esp-rs/esp-idf-sys/issues/400) reports heap corruption with SPIRAM in the global heap. The maintainer's advice there: "Do not place atomics in memory allocated in PSRAM".
+  - [esp-rs/esp-idf-sys#400](https://github.com/esp-rs/esp-idf-sys/issues/400) is a request for a PSRAM allocator. Its author reports corruption with SPIRAM in the global heap, and the maintainer replies that users must be told: "Do not place atomics in memory allocated in PSRAM". He suggests a compile-time error unless a special JSON target is used.
 - **How narrow is it?**
   - It affects only the ESP32 and the S3. The S2, C-series and P4 are not affected.
   - On the S3 it affects every PSRAM-resident atomic, so all of Stylo's `Arc`-heavy data.
@@ -222,7 +226,7 @@ These are the doc lookups the plan asks for before H1. They are from ESP-IDF v5.
 ### P4 atomics (AMO, LR/SC) on PSRAM
 - **No restriction is documented.** The P4 external-RAM and memory-allocation pages list none.
 - **The source treats the P4 as plain hardware atomics.** ESP-IDF's `esp_stdatomic.h` sets `HAS_ATOMICS_32` to `(__riscv_atomic == 1)`, with no PSRAM carve-out. The SPIRAM workaround Kconfig is limited to ESP32/S3.
-- **Cache coherence:** the P4 docs only discuss CPU vs DMA coherence ([mm_sync](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32p4/api-reference/system/mm_sync.html)). Both HP cores share the L2 cache, so CPU-to-CPU coherence on PSRAM is not documented as an issue.
+- **Cache coherence:** the P4 docs only discuss CPU vs DMA coherence ([mm_sync](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32p4/api-reference/system/mm_sync.html)). Coherence between the two HP cores on PSRAM is not documented either way. Assumption: the shared cache keeps them coherent.
 - **Not confirmed:** nothing found in the TRM or in issues either way, which is absence of evidence. The H1 row "PSRAM atomics with Stylo" stays. The hello firmware runs a two-thread atomics stress test on a PSRAM allocation for it (see [H1 readiness](#h1-readiness)).
 
 ## Rerun commands

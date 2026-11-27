@@ -62,7 +62,8 @@ jobs:
     needs: changes
     if: needs.changes.outputs.cross == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    # A cold build takes ~30 min on 20 cores; a 4-vCPU runner plus the image build is much slower.
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
       - name: Free disk space for the image and the target dir
@@ -95,4 +96,6 @@ jobs:
           name: p4-function-ev-firmware
           path: |
             out/*/app.bin
+            out/*/bootloader.bin
+            out/*/firmware.elf
             out/*/*.txt

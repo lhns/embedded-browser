@@ -30,6 +30,9 @@ cargo $toolchain build --release --locked --target "$target"
 bin=$(cargo $toolchain metadata --no-deps --format-version 1 | python3 -c 'import json,sys; print(json.load(sys.stdin)["packages"][0]["name"])')
 elf=$CARGO_TARGET_DIR/$triple/release/$bin
 cp "$elf" "$out/firmware.elf"
+# The bootloader ESP-IDF built from our sdkconfig (chip revision, flash size); espflash would
+# otherwise flash its bundled one.
+cp "$CARGO_TARGET_DIR/$triple/release/bootloader.bin" "$out/bootloader.bin"
 
 espflash save-image --chip "$chip" --flash-size 16mb --partition-table partitions.csv \
   "$elf" "$out/app.bin" | tee "$out/save-image.txt"
