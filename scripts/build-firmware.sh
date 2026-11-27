@@ -5,6 +5,7 @@
 # Env: BOARD (default p4-function-ev), CHIP (esp32p4),
 #      TARGET (default targets/riscv32imafc-esp-espidf.json, relative to the board dir),
 #      TOOLCHAIN (empty = rust-toolchain.toml; "+esp" for the espup Xtensa toolchain),
+#      FEATURES (cargo features, e.g. measured-set; default none),
 #      CARGO_TARGET_DIR (default /tmp/eb-target), OUT_DIR (default <repo>/out).
 # The source is copied to the container's Linux filesystem first: ESP-IDF's CMake build breaks on
 # Windows bind-mount paths and is slow on them.
@@ -26,7 +27,7 @@ cp -a "$repo/boards" "$work/"
 cd "$work/boards/$board"
 
 # shellcheck disable=SC2086 # $toolchain is empty or one word
-cargo $toolchain build --release --locked --target "$target"
+cargo $toolchain build --release --locked --target "$target" ${FEATURES:+--features "$FEATURES"}
 bin=$(cargo $toolchain metadata --no-deps --format-version 1 | python3 -c 'import json,sys; print(json.load(sys.stdin)["packages"][0]["name"])')
 elf=$CARGO_TARGET_DIR/$triple/release/$bin
 cp "$elf" "$out/firmware.elf"

@@ -20,10 +20,16 @@ const HEIGHT: u32 = 600;
 const ENGINE_STACK: usize = 512 * 1024;
 
 const PAGE: &str = include_str!("dashboard.html");
+#[cfg(not(feature = "measured-set"))]
 const FONTS: [&[u8]; 2] = [
     include_bytes!("../assets/fonts/NotoSans-Regular-latin.ttf"),
     include_bytes!("../assets/fonts/NotoSans-Bold-latin.ttf"),
 ];
+#[cfg(feature = "measured-set")]
+const FONTS: [&[u8]; 2] = [ttf_noto_sans::REGULAR, ttf_noto_sans::BOLD];
+// The image crate is linked (via blitz-dom) either way; this keeps the feature's codecs explicit.
+#[cfg(feature = "measured-set")]
+use image as _;
 
 fn main() {
     #[cfg(target_os = "espidf")]

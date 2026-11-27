@@ -71,6 +71,32 @@ Measured (Windows host, Docker Desktop, host busy with other builds):
    bind mount.
 6. Bind-mounted output dirs owned by another uid: the script `chmod 777`s the output dir; CI chowns the cache dir to uid 1000.
 
+## Hello-Blitz on S3 QEMU
+
+One attempt, serial only (`scripts/qemu-s3-hello-blitz.sh`). Image: the S3 hello-Blitz firmware from `docs/m0/esp-build-results.md` (`boards/p4-function-ev`, default feature set, `xtensa-esp32s3-espidf` custom spec, 6.04 MiB), prebuilt, not rebuilt from this branch. Same QEMU and flags as the screenshot flow, plus a 16 MB flash image (`espflash save-image --merge --flash-size 16mb` with `boards/p4-function-ev/partitions.csv`) and `-nographic`. The ADC constructor patch (`scripts/qemu-patch-adc.py`) applies to this ELF too.
+
+**Result: it boots and gets through parse, style and layout, then crashes in the first paint.** Same crash, same PC in two runs.
+
+```
+I (4741) esp_psram: Found 8MB PSRAM device
+I (5062) main_task: Calling app_main()
+eb-hello: atomics OK at 0x3c6109a0: u32 400000/400000, u64 400000/400000, arc count 1, 5672.1 ms
+eb-hello: phase fonts: 1244.9 ms
+eb-hello: phase parse: 932.7 ms
+Resolve(1): 3.2s (style: 823ms, damage: 5.8ms, construct: 882ms, pconstruct: 311ms, layout: 1.0s, ...)
+eb-hello: phase style+layout: 3177.8 ms
+eb-hello: heap style+layout internal: used 446 KB, peak 447 KB, total 457 KB
+eb-hello: heap style+layout psram: used 650 KB, peak 654 KB, total 8192 KB
+Guru Meditation Error: Core  0 panic'ed (LoadProhibited).   PC 0x4247eb25  EXCVADDR 0x8037e980
+```
+
+- **Backtrace** (addr2line): `vello_cpu::fine::lowp::U8Kernel::alpha_composite_buffer` <- `Fine::indexed_fill` <- `paint_fill` <- `bucket_and_rasterize` <- `RenderContext::render_with` <- `run`. No "paint" phase line and no checksum line were printed; the firmware then reboots in a loop. The cause is undetermined: it could be a QEMU issue or a real Xtensa problem (stack, alignment, the pixel buffer). I stopped here as agreed.
+- **Phase times are emulator wall-clock** and varied about 2x between two runs (style+layout 3.2 s and 1.9 s), so they say nothing about the device.
+- **Heap:** internal RAM was at 446 of 457 KB after style+layout; PSRAM held only 650 KB. With `SPIRAM_MALLOC_ALWAYSINTERNAL=4096`, Stylo's many small allocations fill internal RAM, which leaves no room for Wi-Fi and DMA buffers on a real S3. This holds whatever caused the crash; lowering the threshold is a thing to try on hardware.
+- **Atomics check:** `atomics OK` at `0x3c6109a0`. That address is past the end of the flash-mapped rodata segment (`3c4d0020` + 1,275,744 bytes), so the block is in PSRAM. **QEMU does not model the S32C1I-on-PSRAM hardware limitation, so the pass proves nothing about real S3 hardware** (see the S32C1I section in `docs/m0/esp-build-results.md`). It does show the software path (2 threads, `Arc`, 64-bit libcall atomics) runs.
+- Threads: `tasks` was 6 from engine start through style+layout.
+- **Script status:** `scripts/qemu-s3-hello-blitz.sh [build-out-dir]` runs the flow and exits 1 at the paint crash. It exits 0 once the firmware prints `eb-hello: done`.
+
 ## P4 in QEMU 9.2.2 (esp-develop-9.2.2-20261109)
 
 The `qemu-riscv32-softmmu` release (a separate tarball from the xtensa one) lists `esp32p4` among its machines

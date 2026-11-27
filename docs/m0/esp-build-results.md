@@ -119,6 +119,44 @@ Cheap wins if the budget ever gets tight:
 - **CI:** the `cross-p4` job on a GitHub runner took 15 min in total. That covers the image build, about 8 min, and `cargo build`, 4 min 37 s.
 - **Reproducible:** the CI app image was byte-for-byte the same size, 6,081,152 bytes.
 
+## Size with the host-measured feature set
+
+The 5.80 MiB P4 image above came from a build without what `tools/measure` (the source of the M0 heap numbers) has: `blitz-dom/floats`, the `image` PNG, JPEG and GIF codecs, and the full Noto Sans regular+bold instead of the Latin-1 subset. The board crate now has a cargo feature `measured-set` that turns on exactly those (`boards/p4-function-ev/Cargo.toml`); the default feature set is unchanged. `FEATURES=measured-set` makes `scripts/build-firmware.sh` build it.
+
+| | Default set | `measured-set` | Delta |
+|---|---|---|---|
+| **App image** (`espflash save-image`) | 6,081,152 (5.80 MiB) | **6,608,816 (6.30 MiB)** | **+527,664 (+515 KiB, +8.7%)** |
+| `.flash.text` | 4,762,404 | 4,900,892 | +138,488 |
+| `.flash.rodata` | 1,241,084 | 1,630,268 | +389,184 |
+| Share of the 14 MiB factory partition | 41.4% | 45.0% | |
+
+`scripts/size-gate.sh p4-function-ev app.bin`: `app image 6.30 MiB (6608816 bytes) within budget 8.00 MiB (8388608 bytes)`. **Still a go**: 1.70 MiB (1,779,792 bytes) under the 8 MiB limit.
+
+### Where the +515 KiB goes
+Same method as above (`nm`, `scripts/size-attribution.py`; approximate under fat LTO).
+1. **Full Noto Sans fonts: about +361 KiB (70%).** Regular is 203,084 bytes and Bold 204,464, against 18,792 + 18,760 for the Latin subset. This is almost all unnamed `.flash.rodata`. It is the biggest single lever: subsetting to what the product needs (Latin + a few symbols) brings it back to about 40 KB.
+2. **Image codecs: about +94 KB of code.** The `image` group grew from 53 to 147 KB text. `zune-jpeg` is about 73 KB of that (zune_core adds more rodata and shared code), GIF plus `weezl` about 12 KB, PNG +6 KB, the `image` crate itself +13 KB. I checked in `nm` that the decoders are in the ELF (they would be dropped if unreachable): `zune_jpeg` 82 KB, `gif`+`weezl` 12 KB.
+3. **`floats`: about +30 KB of code.** `blitz_dom` +13 KB, `taffy` +8 KB, core/std +10 KB (monomorphizations).
+4. Stylo, shaping, raster, ESP-IDF and html5ever are unchanged to the KB.
+
+The three items sum to about 485 KiB; the rest is rounding and codec tables in anonymous rodata.
+
+**Still not counted: Wi-Fi, TLS and the HTTP client.** The hello firmware has no networking. This number is the engine plus the measured features only.
+
+### Network stack addition (estimate)
+**Measured (C, outside the Rust build):** two bare ESP-IDF v5.5.5 apps for `esp32p4` in the `eb-p4-build` image, `-Os`: an empty `app_main` (182,384 bytes) and one that calls `esp_http_client` with `esp_crt_bundle_attach` and starts `esp_netif` and the default event loop, which pulls in lwIP, esp-tls, mbedTLS and the certificate bundle (571,344 bytes). That is **+388,960 bytes (about 380 KiB) for HTTP client + TLS + lwIP**. It is an upper bound for us: the Rust image already links part of lwIP, newlib and the event loop.
+
+**Estimate (not measured): Wi-Fi.**
+- The P4 has no radio. On the Function-EV, Wi-Fi comes from an ESP32-C6 through ESP-Hosted and `esp_wifi_remote`, so the P4 image carries only the host side: roughly 100-200 KiB, from memory of typical sizes. I did not build it (it needs managed components from the registry).
+- A native Wi-Fi stack (S3) is larger: a typical ESP-IDF Wi-Fi station example is about 0.4-0.5 MiB bigger than an empty app. Also from memory, unverified.
+
+| Image | Estimate |
+|---|---|
+| P4: measured set + HTTP/TLS/lwIP (measured) + hosted Wi-Fi (estimate) | 6.30 + about 0.4 + 0.1-0.2 = **about 6.8-6.9 MiB** |
+| S3: measured set (about 6.5 MiB, default-set S3 image was 6.04 MiB) + HTTP/TLS + native Wi-Fi | **about 7.3-7.5 MiB** |
+
+Both stay under 8 MiB with a margin of about 0.5-1.2 MiB. The S3 is the tight one; subsetting the fonts (about -320 KiB) is the first lever. Re-measure when networking is in the firmware (M2); this section is not a gate result.
+
 ## S3 compile-only build
 
 The S3 build is the same firmware, with nothing changed. Build details:
