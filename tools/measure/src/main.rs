@@ -7,9 +7,13 @@
 //!   band [pages..]                                      band vs full-frame pixel diff
 //!   damage                                              restyle damage experiment
 //!   png <out-dir> [pages..]                             save full frames
+//!   heap-cap [--wasm m.wasm] [--cap-mb 12] [--s3-mb 4] [pages..]
+//!                                                       core API under a capped heap (CI gate)
+//!   heap-cap-page <page> --cap-mb N                     one page of `heap-cap`
 
 mod alloc;
 mod engine;
+mod heap_cap;
 mod threads;
 
 use std::path::{Path, PathBuf};
@@ -40,6 +44,8 @@ fn main() {
         "band" => band(rest),
         "damage" => damage(),
         "png" => png(rest),
+        "heap-cap" => heap_cap::run(rest),
+        "heap-cap-page" => heap_cap::page(rest),
         _ => {
             eprintln!("usage: measure heap|heap-all|raster|band|damage|png ... (see src/main.rs)");
             std::process::exit(2);
@@ -48,7 +54,7 @@ fn main() {
 }
 
 /// Positional page arguments, or the corpus plus any fetched pages.
-fn pages(args: &[String]) -> Vec<PathBuf> {
+pub(crate) fn pages(args: &[String]) -> Vec<PathBuf> {
     let given: Vec<PathBuf> = args
         .iter()
         .filter(|a| !a.starts_with("--"))
@@ -69,7 +75,7 @@ fn pages(args: &[String]) -> Vec<PathBuf> {
     v
 }
 
-fn opt<'a>(args: &'a [String], name: &str) -> Option<&'a str> {
+pub(crate) fn opt<'a>(args: &'a [String], name: &str) -> Option<&'a str> {
     args.iter()
         .position(|a| a == name)
         .and_then(|i| args.get(i + 1))
@@ -84,11 +90,11 @@ fn parse_raster(s: &str) -> Option<Raster> {
     }
 }
 
-fn page_name(p: &Path) -> String {
+pub(crate) fn page_name(p: &Path) -> String {
     p.file_stem().unwrap().to_string_lossy().into_owned()
 }
 
-fn mb(b: isize) -> String {
+pub(crate) fn mb(b: isize) -> String {
     format!("{:.2}", b as f64 / (1024.0 * 1024.0))
 }
 
@@ -153,7 +159,7 @@ fn heap(args: &[String]) {
     );
 }
 
-fn field<'a>(line: &'a str, key: &str) -> &'a str {
+pub(crate) fn field<'a>(line: &'a str, key: &str) -> &'a str {
     line.split_whitespace()
         .find_map(|kv| kv.strip_prefix(key).and_then(|v| v.strip_prefix('=')))
         .unwrap_or("?")

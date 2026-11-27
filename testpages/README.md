@@ -10,4 +10,6 @@ The repo is public, so committed pages are synthetic; real sites are fetched at 
 
 - `generate.py` regenerates the three pages: `python testpages/generate.py testpages`.
 - `fetch.sh` downloads real pages and their stylesheets into `fetched/` (gitignored). Never commit them, and never commit a capture of anyone's own Home Assistant.
+- `golden/` holds the engine's renders, checked with a tolerance by `cargo test -p embedded-browser --test golden` (`UPDATE_GOLDENS=1` rewrites them).
+- `reference/` holds headless Chromium screenshots for comparison (`scripts/reference-screenshots.sh`); see docs/m1/side-by-side.md.
 - `js/` belongs to the JS track.

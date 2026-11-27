@@ -13,6 +13,7 @@ publish = false
 svg = ["blitz-dom/svg", "blitz-paint/svg"]
 
 [dependencies]
+embedded-browser = { path = "../../crates/embedded-browser" }
 # Minimal Blitz: no system fonts, no ICU text-transform, no a11y, no net, no SVG.
 # `floats` is on because real articles need it (it is not in Blitz's defaults).
 blitz-dom = { version = "=0.3.0-beta.6", default-features = false, features = ["floats"] }
