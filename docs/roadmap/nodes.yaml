@@ -217,7 +217,7 @@
   folded: []
   overview: false
   plain: "On the host, run the small corpus scripts in QuickJS-ng to learn how much memory and which web APIs they need."
-  notes: "Done when: the custom dashboard, Tasmota, ESPHome v1 and htmx scripts run under a memory cap with a logging stub DOM, with peak heap, parse time and the list of web APIs touched recorded. The Home Assistant bundle is measured for information only. Result: all four (and petite-vue) complete with no exceptions under 1 MB at 32-bit (peak 0.3-0.94 MB incl. runtime); J2 needs about 130 API members on 34 interfaces, no shadow DOM or canvas. Cold compile is 3-6 KB/ms on the host (0.7-2.5 s per 100 KB at a provisional 20-75x P4 derate) while stripped bytecode loads 13-21x faster. QuickJS-ng adds about 0.55-0.75 MB flash. HA pulls 4.6 MB of modules and 34 MB heap before rendering, confirming remote mode."
+  notes: "Done when: the custom dashboard, Tasmota, ESPHome v1 and htmx scripts run under a memory cap with a logging stub DOM, with peak heap, parse time and the list of web APIs touched recorded. The Home Assistant bundle is measured for information only. Result: all four (and petite-vue) complete with no exceptions under 1 MB at 32-bit (peak 0.3-0.94 MB incl. runtime); J2 needs about 140 logged API paths on 35 interfaces, no shadow DOM or canvas, and a JS stack of at least 256 KB. Cold compile is 3-6 KB/ms on the host (0.7-2.5 s per 100 KB at a provisional 20-75x P4 derate) while stripped bytecode loads 10-30x faster. QuickJS-ng adds about 0.55-0.75 MB flash. HA pulls 4.6 MB of modules and 34 MB heap before rendering, confirming remote mode."
 
 - id: eng-m0-go-no-go
   title: "M0 go or no-go"

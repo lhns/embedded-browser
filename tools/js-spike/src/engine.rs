@@ -379,7 +379,12 @@ pub fn run(item: &Item, cap: Option<usize>, strip_pages: bool) -> Outcome {
             return out;
         }
     };
-    rt.set_max_stack_size(512 * 1024);
+    // JS stack limit; JS_SPIKE_STACK_KB overrides it to test smaller device stacks.
+    let stack_kb = std::env::var("JS_SPIKE_STACK_KB")
+        .ok()
+        .and_then(|v| v.parse::<usize>().ok())
+        .unwrap_or(512);
+    rt.set_max_stack_size(stack_kb * 1024);
     let deadline = Instant::now() + WALL_LIMIT;
     rt.set_interrupt_handler(Some(Box::new(move || Instant::now() > deadline)));
     {

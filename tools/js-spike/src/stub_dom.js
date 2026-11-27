@@ -1727,6 +1727,14 @@
       const n = interactTargets[i];
       if (!n || !connected(n)) return;
       const s = S(n);
+      if (s.name === 'FORM') {
+        // Submit the way a user would: click the form's submit button (default action fires
+        // `submit`), or dispatch `submit` when it has none.
+        const btn = descendants(n, []).find((d) => { const ds = S(d); return (ds.name === 'BUTTON' && (attrGet(ds, 'type') || 'submit') === 'submit') || (ds.name === 'INPUT' && attrGet(ds, 'type') === 'submit'); });
+        if (btn) dispatch(btn, makeEvent(MouseEvent, 'click', { bubbles: true, cancelable: true, button: 0 }));
+        else dispatch(n, makeEvent(SubmitEvent, 'submit', { bubbles: true, cancelable: true }));
+        return;
+      }
       const changes = s.name === 'SELECT' || (s.ls && s.ls.has('change')) || (s.h && s.h.change) || attrGet(s, 'onchange') != null;
       if (changes) {
         if (s.name === 'SELECT') { if (s.raw.options.length > 1) s.raw.selectedIndex = 1; } else if (s.name === 'INPUT') s.value = '42';

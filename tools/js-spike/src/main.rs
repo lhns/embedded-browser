@@ -481,17 +481,28 @@ fn report(
             }
         }
         if !b.net.is_empty() {
-            let _ = writeln!(
-                r,
-                "\nNetwork ({} requests/messages): {}",
-                b.net.len(),
-                b.net
-                    .iter()
-                    .take(12)
-                    .map(|n| format!("`{}`", truncate(n, 80)))
+            let _ = writeln!(r, "\nNetwork ({} requests/messages): {}", b.net.len(), {
+                // Distinct entries in first-seen order, with repeat counts.
+                let mut seen: Vec<(String, usize)> = Vec::new();
+                for n in &b.net {
+                    let n = truncate(n, 80);
+                    match seen.iter_mut().find(|(s, _)| *s == n) {
+                        Some(e) => e.1 += 1,
+                        None => seen.push((n, 1)),
+                    }
+                }
+                seen.iter()
+                    .take(25)
+                    .map(|(n, c)| {
+                        if *c > 1 {
+                            format!("`{n}` ×{c}")
+                        } else {
+                            format!("`{n}`")
+                        }
+                    })
                     .collect::<Vec<_>>()
                     .join(", ")
-            );
+            });
         }
         let _ = writeln!(r, "\nWeb APIs touched:\n");
         let grouped = group_apis(&b.apis);
@@ -722,7 +733,15 @@ mod tests {
             "{:?}",
             o.apis
         );
-        assert!(o.body_text.contains("Swapped by htmx"), "{}", o.body_text);
+        // Polling, the out-of-band swap, the outerHTML swap and the form post all landed.
+        for want in [
+            "Door closed",
+            "Door moving",
+            "Battery 87%",
+            "Setpoint saved",
+        ] {
+            assert!(o.body_text.contains(want), "{want}: {}", o.body_text);
+        }
     }
 
     #[test]

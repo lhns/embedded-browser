@@ -5,20 +5,20 @@ with the real corpus scripts? Date: 2026-11-27. Tool: `tools/js-spike`.
 
 ## Short answer
 
-- **The J2 corpus fits easily.** The custom dashboard, Tasmota, ESPHome v1 and htmx (plus
+- **The J2 corpus fits, htmx close to the line.** The custom dashboard, Tasmota, ESPHome v1 and htmx (plus
   petite-vue) all run to completion in QuickJS-ng under a 1 MB cap on a 32-bit host.
   - Peak JS heap is 0.3–0.94 MB, including the runtime and context (152 KB).
   - The script raises no exceptions.
 - **Parse speed is the risk, not memory.** Cold compile runs at about 3–6 KB/ms on the host.
-  - With a provisional P4 derate of 20–75x, htmx (52 KB) needs about 0.4–1.4 s.
+  - With a provisional P4 derate of 20–75x, htmx (52 KB) needs about 0.4–1.9 s.
   - A 100 KB script needs about 0.7–2.5 s, against J1's 300 ms target.
-  - Loading cached, stripped bytecode is 13–21x faster than compiling: htmx loads in
+  - Loading cached, stripped bytecode is 10–30x faster than compiling: htmx loads in
     0.9 ms on the host, so about 20–70 ms on the P4.
-- **The J2 API set is about 130 members on about 34 interfaces.**
+- **The J2 API set is about 140 logged paths on 35 interfaces.**
   - It needs no shadow DOM, custom elements or canvas.
-  - The bulk is DOM core (about 70), XHR/fetch/WebSocket/EventSource (about 34) and events (14).
+  - The bulk is DOM core (78), XHR/fetch/WebSocket/EventSource (36) and events (15).
 - **Home Assistant confirms remote mode.**
-  - At start-up it statically pulls 4.6 MB of modules (97 files), which take 1.5 s to compile
+  - At start-up it imports 4.6 MB of modules (97 files), which take 1.5–2.2 s to compile
     on the host.
   - Heap reaches 34 MB (32-bit) before anything renders.
   - It defines custom elements, calls `attachShadow` and `CSSStyleSheet.replaceSync`, and
@@ -80,20 +80,23 @@ with the real corpus scripts? Date: 2026-11-27. Tool: `tools/js-spike`.
 
 | item | script bytes | compile ms | run ms | peak heap | heap at end | peak, stripped bytecode | 1 MB | 4 MB | 16 MB | top-level exceptions |
 |---|---|---|---|---|---|---|---|---|---|---|
-| custom dashboard | 3 718 | 0.64 | 0.33 | 309 KB | 300 KB | 299 KB | pass | pass | pass | 0 |
-| htmx 2.0.11 | 52 182 | 18.5 | 1.2 | 936 KB | 761 KB | 759 KB | pass | pass | pass | 0 |
-| petite-vue 0.4.1 | 16 901 | 7.7 | 12.2 | 414 KB | 382 KB | 414 KB | pass | pass | pass | 0 |
-| Tasmota v16.0.0 root page | 1 997 | 0.63 | 0.09 | 368 KB | 287 KB | 360 KB | pass | pass | pass | 0 |
-| ESPHome web_server v1 | 5 213 | 0.57 | 4.2 | 319 KB | 296 KB | 319 KB | pass | pass | pass | 0 |
-| Home Assistant 20261125.1 (info) | 4 561 636 | 1 536 | 680 | 33.9 MB | 33.9 MB | n/a (modules) | FAIL | FAIL | FAIL | 4 |
+| custom dashboard | 3 718 | 0.72 | 0.41 | 309 KB | 299 KB | 299 KB | pass | pass | pass | 0 |
+| htmx 2.0.11 | 52 182 | 25.8 | 1.3 | 936 KB | 792 KB | 798 KB | pass | pass | pass | 0 |
+| petite-vue 0.4.1 | 16 901 | 8.8 | 22.0 | 414 KB | 382 KB | 414 KB | pass | pass | pass | 0 |
+| Tasmota v16.0.0 root page | 1 997 | 0.59 | 0.09 | 368 KB | 283 KB | 362 KB | pass | pass | pass | 0 |
+| ESPHome web_server v1 | 5 213 | 0.90 | 7.3 | 319 KB | 296 KB | 319 KB | pass | pass | pass | 0 |
+| Home Assistant 20261125.1 (info) | 4 561 636 | 2 240 | 565 | 33.9 MB | 33.9 MB | n/a (modules) | FAIL | FAIL | FAIL | 4 |
 
 - **What the heap includes:** heaps are allocator peaks over the whole run, including the
   runtime and a full context (152 KB) but not the stub DOM.
 - **x86_64 comparison** ([js-spike/report-x86_64-windows.md](js-spike/report-x86_64-windows.md)):
   heaps are 1.15–1.3x larger, so htmx peaks at 1.21 MB and **fails the 1 MB cap at 64-bit**.
-  Compile times there are about 1.6x faster (htmx 11.5 ms).
+  Compile times there are about 1.6–2.5x faster (htmx 9.6–16 ms).
+- **Timing noise:** the host is a shared VM, and other workers' Docker builds ran
+  concurrently. The same i686 binary compiled htmx in 18.5 ms in one run and 25.8 ms in
+  another (both the minimum of 5), so read timings as ±40%.
 - **Bytecode:** stripped bytecode is 0.65–1.85x the source size. It loads in 0.04 ms
-  (dashboard) to 0.89 ms (htmx) at 32-bit, against 0.6–18.5 ms to compile.
+  (dashboard) to 0.88 ms (htmx) at 32-bit, against 0.6–26 ms to compile.
 - **Exceptions:** none of the J2 items raised an exception, an unhandled rejection or a
   `console.error`.
   - While testing, an htmx `console.error` (`htmx:badResponseUrl`) exposed a stub bug: a
@@ -126,15 +129,15 @@ What each item exercised:
 
 Full per-item lists, with `(missing)` probes and selector strings, are in the reports.
 
-J2 union (dashboard, Tasmota, ESPHome v1, htmx) at 32-bit is **132 API paths on 34
+J2 union (dashboard, Tasmota, ESPHome v1, htmx) at 32-bit is **143 API paths on 35
 interfaces and globals**, by group:
 
 | group | count | members |
 |---|---|---|
-| DOM core | 70 | `Document`: `body`, `head`, `title`, `readyState`, `activeElement`, `getElementById`, `querySelector(All)`, `createElement`, `createDocumentFragment`. `Element`: `id`, `className`, `tagName`, `classList` (`add`/`remove`/`toggle`/`contains`/`length`), `attributes`, `get/has/removeAttribute`, `children`, `matches`, `closest`, `querySelector(All)`, `innerHTML` get/set, `insertAdjacentHTML`, `remove`. `Node`: `appendChild`, `insertBefore`, `removeChild`, `cloneNode`, `childNodes`, `first/next/previousSibling`, `parentNode`/`parentElement`, `nodeType`, `isConnected`, `getRootNode`, `textContent` set. `HTMLElement`: `style`, `dataset`, `hidden`, `innerText` set. Form controls: `name`, `value`, `form`. `HTMLTableElement.rows`, `HTMLTemplateElement.content`, `DOMParser.parseFromString`, `CSSStyleDeclaration` property set |
-| events | 14 | `addEventListener`, `dispatchEvent`, `CustomEvent`, `Event` `type`/`target`/`detail`/`data`, `ProgressEvent` `loaded`/`total`/`lengthComputable`, inline `onclick`/`onchange` attributes, `window.addEventListener`, `onpopstate` |
+| DOM core | 78 | `Document`: `body`, `head`, `title`, `readyState`, `activeElement`, `getElementById`, `querySelector(All)`, `createElement`, `createDocumentFragment`. `Element`: `id`, `className`, `tagName`, `classList` (`add`/`remove`/`toggle`/`contains`/`length`), `attributes`, `get/has/removeAttribute`, `children`, `matches`, `closest`, `querySelector(All)`, `innerHTML` get/set, `insertAdjacentHTML`, `remove`. `Node`: `appendChild`, `insertBefore`, `removeChild`, `cloneNode`, `childNodes`, `first/next/previousSibling`, `parentNode`/`parentElement`, `nodeType`, `isConnected`, `getRootNode`, `textContent` set. `HTMLElement`: `style`, `dataset`, `hidden`, `innerText` set. Form controls: `name`, `value`, `form`; `HTMLFormElement.elements`/`name`; htmx also probes the validation API (`willValidate`, `noValidate`, `formNoValidate`, logged as missing). `Node.isSameNode`. `HTMLTableElement.rows`, `HTMLTemplateElement.content`, `DOMParser.parseFromString`, `CSSStyleDeclaration` property set |
+| events | 15 | `addEventListener`, `dispatchEvent`, `preventDefault`, `CustomEvent`, `Event` `type`/`target`/`detail`/`data`, `ProgressEvent` `loaded`/`total`/`lengthComputable`, inline `onclick`/`onchange` attributes, `window.addEventListener`, `onpopstate` |
 | timers | 3 | `setTimeout`, `clearTimeout`, `setInterval` |
-| network | 34 | `XMLHttpRequest` (`open`, `send`, `abort`, `setRequestHeader`, `getResponseHeader`, `overrideMimeType`, `readyState`, `status`, `response(Text/URL)`, `timeout`, `withCredentials`, `upload`, `on*` handlers), `fetch` with `Response.ok`/`json`, `WebSocket` (`send`, `onclose`, message events), `EventSource`, `FormData`, `URL` |
+| network | 36 | `XMLHttpRequest` (`open`, `send`, `abort`, `setRequestHeader`, `getResponseHeader`, `overrideMimeType`, `readyState`, `status`, `response(Text/URL)`, `timeout`, `withCredentials`, `upload`, `on*` handlers), `fetch` with `Response.ok`/`json`, `WebSocket` (`send`, `onclose`, message events), `EventSource`, `FormData` (`append`, `delete`, `forEach`, `keys`), `URL` |
 | storage | 3 | `localStorage` `getItem`, `setItem`, `removeItem` |
 | custom elements / shadow DOM | 0 | — |
 | canvas | 0 | — |
@@ -170,7 +173,7 @@ interfaces and globals**, by group:
   hooks), and a no-op `XPathEvaluator` or a guard for it.
 
 **Size:**
-- **Members:** about 130 members on about 34 interfaces.
+- **Members:** about 140 logged paths on 35 interfaces, which is roughly 100 distinct members once `(set)`, `new X` and `(missing)` variants are merged.
 - **Reference implementation:** the stub implements a superset (plus logging and the HA
   extras) in about 1 750 lines of JS.
 - **Native estimate:** a native Rust binding layer over Blitz is my estimate of roughly
@@ -183,8 +186,9 @@ interfaces and globals**, by group:
   `app` as ES modules, the way HA's `index.html` loads them, with a module loader that
   resolves the chunk files.
 - **Code size:**
-  - Start-up statically imports 95 further chunks, 4.56 MB in all.
-  - Compile time is 1.5 s at 32-bit and 1.0 s at 64-bit on the host, roughly 30–110 s at the
+  - Start-up imports 95 further chunks, 4.56 MB in all. Most arrive by dynamic import
+    during the load phase: peak during the script phase is 8.9 MB against 33.9 MB overall.
+  - Compile time is 1.5–2.2 s at 32-bit and 1.0–1.3 s at 64-bit on the host, roughly 30–170 s at the
     P4 derate.
 - **Heap:** 33.9 MB at 32-bit (41 MB at 64-bit), with no login and nothing rendered. Every cap
   fails.
@@ -243,25 +247,25 @@ interfaces and globals**, by group:
 
 | workload | i686 host | P4 at 20–75x |
 |---|---|---|
-| htmx compile (52 KB) | 18.5 ms | 0.37–1.4 s |
+| htmx compile (52 KB) | 18.5–25.8 ms | 0.37–1.9 s |
 | 100 KB compile (at 3 KB/ms) | ~33 ms | 0.7–2.5 s |
-| htmx stripped-bytecode load | 0.89 ms | 18–67 ms |
-| custom dashboard compile | 0.64 ms | 13–48 ms |
-| Tasmota / ESPHome compile | ~0.6 ms | 12–45 ms |
+| htmx stripped-bytecode load | 0.88 ms | 18–66 ms |
+| custom dashboard compile | 0.64–0.72 ms | 13–54 ms |
+| Tasmota / ESPHome compile | 0.6–0.9 ms | 12–68 ms |
 
 H1 should measure both compile and bytecode load directly.
 
 ## Against the plan and ADR 0004
 
-- **Confirms ADR 0004:** the small-script corpus fits comfortably in QuickJS-ng (under
-  1 MB, 32-bit), and HA does not.
+- **Confirms ADR 0004:** the small-script corpus fits in QuickJS-ng (under 1 MB at 32-bit,
+  htmx at 0.94 MB), and HA does not.
 - **J1's "100 KB script parsed in ≤300 ms" probably fails for cold source parsing** at this
   derate.
   - Suggestion: make J1's criterion "first load ≤ ~2 s, cached load ≤300 ms" and cache
-    stripped bytecode per script URL in `BlobStore`. Bytecode load is 13–21x faster.
+    stripped bytecode per script URL in `BlobStore`. Bytecode load is 10–30x faster.
   - This is a design input for J1/J2, not a blocker.
-- **QuickJS-ng keeps every function's source text in RAM.** This adds up to 20% of heap here
-  (htmx 936 KB against 759 KB stripped).
+- **QuickJS-ng keeps every function's source text in RAM.** This adds 15–20% to htmx's peak
+  (936 KB, against 759–798 KB stripped over two runs).
   - J2 should load page scripts as stripped bytecode. The catch is that it breaks
     `Function.prototype.toString`, which none of the J2 corpus used.
 - **QuickJS-ng ships fewer host globals than the plan's J2 list implies.**
@@ -271,6 +275,14 @@ H1 should measure both compile and bytecode load directly.
   fragment parsing, `FormData`, and an `XPathEvaluator` stub. ESPHome adds `CSS.escape` and
   `table.rows`.
 - **Inline handlers need element scope.** Tasmota's slider passes `value` as a bare name.
+- **JS stack ≥256 KB.** The plan gives the engine thread ≥256 KB.
+  - With `JS_SPIKE_STACK_KB=256` (release, x86_64), every J2 item still passes with no
+    exceptions.
+  - At 128 KB, htmx and petite-vue hit "Maximum call stack size exceeded".
+  - The QuickJS thread on the P4 therefore needs at least 256 KB of stack. H1 should check
+    this on RV32, whose frames differ.
+  - Debug builds of QuickJS-ng's C exceed even 512 KB. The workspace therefore builds
+    `rquickjs-sys` at `opt-level = 2` in the dev profile.
 
 ## Rerun
 
@@ -291,6 +303,11 @@ docker run --rm -v "$PWD":/src -v js-spike-target:/target -w /src rust:1.95-book
 
 ## Caveats
 
+- **Not every API use is logged:**
+  - Collections the stub returns as plain arrays or objects are not logged member by
+    member: `querySelectorAll` and `children` results, `attributes` entries and `dataset` keys.
+  - Neither are value globals such as `innerWidth`.
+  - Read the J2 set as a floor, not a complete list.
 - **Fixtures:** the canned replies decide how deep each page goes. The tool logs only paths
   actually exercised, so a branch the fixtures never take is not in the API lists.
 - **Probe noise:** `(missing)` entries include library expandos, such as petite-vue's
