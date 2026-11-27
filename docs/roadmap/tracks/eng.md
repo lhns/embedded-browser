@@ -14,7 +14,11 @@ flowchart TB
     eng_peak_heap[/"✔ Measure peak heap by<br/>category"/]
     eng_raster_estimate[/"✔ Estimate raster<br/>speed"/]
     eng_m0_go_no_go{{"✔ M0 go or no-go"}}
-    eng_m1_host_mvp["○ M1 host MVP"]
+    eng_m1_host_mvp["↷ M1 host MVP"]
+    eng_m1_render["✔ M1 render slice"]
+    eng_m1_touch_events_forms["○ M1 touch, events and<br/>forms"]
+    eng_m1_scroll_strip_cache["○ M1 scroll strip<br/>cache"]
+    eng_m1_onscreen_keyboard["⛔ M1 on-screen<br/>keyboard"]
     eng_shadow_dom_upstream["⏸ Shadow DOM in Blitz"]
     eng_fork_atomic_u64["⏸ Fork fix for 64-bit<br/>atomics"]
     eng_fork_memmap_shim["⏸ Fork fix for font<br/>file mapping"]
@@ -22,14 +26,27 @@ flowchart TB
     eng_blitz_builds_esp ~~~ eng_m0_go_no_go
     eng_peak_heap ~~~ eng_m0_go_no_go
     eng_raster_estimate ~~~ eng_m1_host_mvp
-    eng_m0_go_no_go ~~~ eng_shadow_dom_upstream
-    eng_m0_go_no_go ~~~ eng_fork_atomic_u64
-    eng_m1_host_mvp ~~~ eng_fork_memmap_shim
+    eng_m0_go_no_go ~~~ eng_m1_host_mvp
+    eng_m1_host_mvp ~~~ eng_m1_render
+    eng_m1_render ~~~ eng_m1_touch_events_forms
+    eng_m1_render ~~~ eng_m1_scroll_strip_cache
+    eng_m1_touch_events_forms ~~~ eng_m1_onscreen_keyboard
+    eng_m1_scroll_strip_cache ~~~ eng_shadow_dom_upstream
+    eng_m1_scroll_strip_cache ~~~ eng_fork_atomic_u64
+    eng_m1_onscreen_keyboard ~~~ eng_fork_memmap_shim
     eng_shadow_dom_upstream ~~~ eng_fork_memmap_shim
     eng_fork_atomic_u64 ~~~ eng_fork_memmap_shim
     eng_blitz_builds_esp --> eng_m0_go_no_go
     eng_peak_heap --> eng_m0_go_no_go
     eng_m0_go_no_go --> eng_m1_host_mvp
+    eng_m1_host_mvp -.-> eng_m1_render
+    eng_m1_host_mvp -.-> eng_m1_touch_events_forms
+    eng_m1_host_mvp -.-> eng_m1_scroll_strip_cache
+    eng_m1_host_mvp -.-> eng_m1_onscreen_keyboard
+    eng_m0_go_no_go --> eng_m1_render
+    eng_m1_render --> eng_m1_touch_events_forms
+    eng_m1_render --> eng_m1_scroll_strip_cache
+    eng_m1_touch_events_forms --> eng_m1_onscreen_keyboard
     eng_blitz_builds_esp --> eng_fork_atomic_u64
     eng_blitz_builds_esp --> eng_fork_memmap_shim
     classDef vsucc fill:#2e9e4f,stroke:#1b6b34,color:#fff
@@ -49,7 +66,10 @@ flowchart TB
     class eng_std_only_esp_idf,eng_m0_go_no_go decided
     class eng_blitz_builds_esp,eng_raster_estimate mixed
     class eng_peak_heap succ
-    class eng_m1_host_mvp next
+    class eng_m1_host_mvp dead
+    class eng_m1_render unrated
+    class eng_m1_touch_events_forms,eng_m1_scroll_strip_cache next
+    class eng_m1_onscreen_keyboard blocked
     class eng_shadow_dom_upstream,eng_fork_atomic_u64,eng_fork_memmap_shim parked
 ```
 <!-- END GENERATED: track-eng -->
@@ -64,8 +84,12 @@ flowchart TB
 | `eng-peak-heap` | Measure peak heap by category | experiment | host | done | successful | 2026-11-27 | 2026-11-27 | ci-workspace-skeleton |  |  | 32-bit peak 1.1-3.6 MB on synthetic pages, 10.5 MB on a Wikipedia article (P4 go; S3 only for small pages) | docs/m0/host-results.md |
 | `eng-raster-estimate` | Estimate raster speed | experiment | host | done | mixed | 2026-11-27 | 2026-11-27 | ci-workspace-skeleton |  |  | Provisional P4 full frame ~0.2-0.7 s with vello_cpu, 3.4-4.8 s with tiny-skia on the dashboard; banding works; highlight re-raster ~0.3-0.45 s | docs/m0/host-results.md |
 | `eng-m0-go-no-go` | M0 go or no-go | owner-decision | owner | done | n/a | 2026-11-27 | 2026-11-27 | eng-blitz-builds-esp, eng-peak-heap |  |  |  | docs/adr/0002-blitz-engine-stack.md; docs/m0/esp-build-results.md; docs/m0/host-results.md |
-| `eng-m1-host-mvp` | M1 host MVP | feature | host | next | unrated |  |  | eng-m0-go-no-go |  |  |  |  |
-| `eng-m1-side-by-side-review` | M1 side-by-side review | owner-decision | owner | blocked | n/a |  |  | eng-m1-host-mvp |  |  |  |  |
+| `eng-m1-host-mvp` | M1 host MVP | feature | host | abandoned | superseded | 2026-11-27 | 2026-11-27 | eng-m0-go-no-go | eng-m1-render, eng-m1-touch-events-forms, eng-m1-scroll-strip-cache, eng-m1-onscreen-keyboard |  | Split into slices with one verdict each |  |
+| `eng-m1-render` | M1 render slice | feature | host | done | unrated | 2026-11-27 | 2026-11-27 | eng-m0-go-no-go |  |  | Corpus renders in damage-limited bands; heap under the P4 cap | docs/adr/0003-core-api-single-dom-thread.md; docs/m1/side-by-side.md; crates/embedded-browser; testpages/golden |
+| `eng-m1-touch-events-forms` | M1 touch, events and forms | feature | host | next | unrated |  |  | eng-m1-render |  |  |  |  |
+| `eng-m1-scroll-strip-cache` | M1 scroll strip cache | feature | host | next | unrated |  |  | eng-m1-render |  |  |  |  |
+| `eng-m1-onscreen-keyboard` | M1 on-screen keyboard | feature | host | blocked | unrated |  |  | eng-m1-touch-events-forms |  |  |  |  |
+| `eng-m1-side-by-side-review` | M1 side-by-side review | owner-decision | owner | next | n/a |  |  | eng-m1-render |  |  |  |  |
 | `eng-shadow-dom-upstream` | Shadow DOM in Blitz | feature | host | parked | unrated |  |  |  |  |  |  |  |
 | `eng-fork-atomic-u64` | Fork fix for 64-bit atomics | feature | owner | parked | unrated |  |  | eng-blitz-builds-esp |  |  |  |  |
 | `eng-fork-memmap-shim` | Fork fix for font file mapping | feature | owner | parked | unrated |  |  | eng-blitz-builds-esp |  |  |  |  |
@@ -79,7 +103,11 @@ flowchart TB
 | `eng-peak-heap` | Measure peak heap by category | **go** on every page; Wikipedia has ~1 MB margin once allocator overhead is added | 32-bit peak 1.1-3.6 MB on synthetic pages, 10.5 MB on a Wikipedia article (P4 go; S3 only for small pages) | Measure how much memory the engine needs for each corpus page, split by what uses it. | Done when: peak heap on a 32-bit host (i686 or wasm32) is recorded per category (DOM/style/layout, text/glyphs, images, net) for the corpus, against go (<=12MB), fallback (12-20MB) and stop (>20MB); the S3 8MB tier needs <=4MB. Home Assistant is a static HA-like page or post-script DOM snapshot. Result: wasm32-wasip1 (i686-msvc fails an anyrender size assert), engine + 32px vello_cpu bands: dashboard 1.10, article 3.58, links 1.72, HN 2.13, Wikipedia with images 10.52 MB (go, ~1 MB margin after allocator overhead); a full RGBA frame adds ~3 MB, which puts Wikipedia at 13.4 MB (fallback). Sequential styling spawns no threads. | 2026-11-27 |  |  |  |
 | `eng-raster-estimate` | Estimate raster speed | probably **go**; the dashboard is the risk once PSRAM is counted | Provisional P4 full frame ~0.2-0.7 s with vello_cpu, 3.4-4.8 s with tiny-skia on the dashboard; banding works; highlight re-raster ~0.3-0.45 s | Time the two software rasterizers on the host to guess how fast the P4 will draw. | Done when: vello_cpu and tiny-skia are timed with scalar code paths and the size-build profile, derated by a CoreMark ratio as a provisional estimate; banded paint_scene is verified and any damage source in Blitz is identified. Result: scalar via wasm32 (no simd128) x6.9 CoreMark derate (host 8625, P4 single core assumed 1245 at 360 MHz), PSRAM penalty not modelled. Banding via viewport scroll matches the full frame (vello_cpu <=6 px). RestyleDamage (also set by text edits and insertions) readable between resolve_stylist and resolve, but relayout side effects need a bounds diff; highlight re-raster estimate ~0.27-0.45 s, over the H1 fallback limit. | 2026-11-27 |  |  |  |
 | `eng-m0-go-no-go` | M0 go or no-go |  |  | The owner chose go with Blitz: it builds for the P4 with two shallow shims, the image is 6.3 MiB and peak heap is at most 10.5 MB. | Done when: the owner has read the M0 numbers (build, image size, peak heap) and chosen go, fallback or stop. Go means M1 starts; fallback or stop always comes back to the owner. |  |  |  |  |
-| `eng-m1-host-mvp` | M1 host MVP |  |  | The core engine and simulator render the test pages on a PC, and taps follow links. | Done when: the core and simulator render the corpus, taps navigate, the capped-heap test passes, and each page has a reference screenshot from a real browser at the same viewport with JS off. |  |  |  |  |
+| `eng-m1-host-mvp` | M1 host MVP | Split eng-m1-host-mvp if the slicing makes that cleaner, following the tech-tree granularity rules: one verdict per node. | Split into slices with one verdict each | The core engine and simulator render the test pages on a PC, and taps follow links. Split into rendering, input, scrolling and keyboard slices. | Done when: the core and simulator render the corpus, taps navigate, the capped-heap test passes, and each page has a reference screenshot from a real browser at the same viewport with JS off. Split on 2026-11-27 into eng-m1-render, eng-m1-touch-events-forms, eng-m1-scroll-strip-cache and eng-m1-onscreen-keyboard. |  |  |  |  |
+| `eng-m1-render` | M1 render slice |  | Corpus renders in damage-limited bands; heap under the P4 cap | The core library and the PC simulator load and draw the test pages, redrawing only what changed, within the memory budget. | Done when: the core API (Config, Limits, non-blocking Net, Browser load/tick/render/render_raw, DamageRects) renders the corpus in RGB565 bands with damage-limited, x-clipped re-raster; goldens pass in cargo test; reference screenshots from headless Chromium are committed; the heap-cap CI job passes at 12 MB on wasm32. |  |  |  |  |
+| `eng-m1-touch-events-forms` | M1 touch, events and forms |  |  | Tapping the screen follows links, presses buttons and focuses form fields; the simulator turns mouse clicks into taps. | Done when: touch hit-testing with :active/focus, an EventSink with default actions after dispatch (ADR 0003), link navigation, form submit and checkboxes work in the simulator with the mouse, with tests. |  |  |  |  |
+| `eng-m1-scroll-strip-cache` | M1 scroll strip cache |  |  | Dragging scrolls the page smoothly by copying from pre-drawn strips, drawing new strips a little at a time. | Done when: drag scroll blits from a cache of rasterized strips (about one screen above and below), new strips are rasterized one band per tick, position:fixed elements no longer repeat per band, and the cache size is counted in the heap-cap test. |  |  |  |  |
+| `eng-m1-onscreen-keyboard` | M1 on-screen keyboard |  |  | A small keyboard drawn on the screen lets you type into text fields. | Done when: focusing a text input shows a Rust-drawn keyboard overlay, typing edits the field, and the edit re-rasters only the damaged area. |  |  |  |  |
 | `eng-m1-side-by-side-review` | M1 side-by-side review |  |  | The owner compares our rendering with a real browser and signs off. | Done when: the owner has reviewed engine and reference screenshots side by side and signed off; the goldens are then frozen for regression. |  |  |  |  |
 | `eng-shadow-dom-upstream` | Shadow DOM in Blitz |  |  | Contribute shadow DOM support to Blitz, the path to running Home Assistant on the device. Tracked, not planned. | Done when: Blitz upstream supports shadow DOM and custom elements well enough for Home Assistant's frontend. |  |  |  |  |
 | `eng-fork-atomic-u64` | Fork fix for 64-bit atomics |  |  | blitz-dom and anyrender use 64-bit atomics everywhere; patching our own fork of them would let us drop the custom target specs. | Done when: blitz-dom (src/tree.rs) and anyrender (src/pattern.rs) in our fork (git fork + [patch.crates-io], fixed revision) build on targets without 64-bit atomics and the max-atomic-width target specs are removed. Nothing is filed upstream (owner decision 2026-11-27). Only worth doing if the target specs cause trouble. |  |  |  |  |

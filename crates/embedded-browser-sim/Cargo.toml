@@ -7,3 +7,16 @@ license.workspace = true
 repository.workspace = true
 description = "Host simulator for embedded-browser"
 publish = false
+
+[features]
+# The window needs SDL2 (system library), so it is opt-in: `--features window`.
+window = ["dep:embedded-graphics-simulator", "dep:embedded-graphics"]
+
+[dependencies]
+embedded-browser = { path = "../embedded-browser" }
+image = { version = "0.25", default-features = false, features = ["png"] }
+url = "2"
+# rustls with ring (ureq's default), no aws-lc/cmake.
+ureq = "3"
+embedded-graphics = { version = "0.8", optional = true }
+embedded-graphics-simulator = { version = "0.8", optional = true }

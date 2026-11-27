@@ -49,6 +49,18 @@ static AT_PEAK: [AtomicIsize; N] = [const { AtomicIsize::new(0) }; N];
 /// Live block count, and its value at the peak (for estimating allocator overhead).
 static BLOCKS: AtomicIsize = AtomicIsize::new(0);
 static BLOCKS_AT_PEAK: AtomicIsize = AtomicIsize::new(0);
+/// Allocations that would take the live total past this fail (return null), as on a
+/// device whose heap is full. `isize::MAX` means no cap.
+static CAP: AtomicIsize = AtomicIsize::new(isize::MAX);
+
+/// Make allocations beyond `bytes` of live heap fail.
+pub fn set_cap(bytes: isize) {
+    CAP.store(bytes, Relaxed);
+}
+
+fn over_cap(extra: usize) -> bool {
+    TOTAL.load(Relaxed).saturating_add(extra as isize) > CAP.load(Relaxed)
+}
 
 /// Header size in front of each block: enough for the tag and the block's alignment.
 fn header(align: usize) -> usize {
@@ -74,6 +86,9 @@ impl Counting {
 
 unsafe impl GlobalAlloc for Counting {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        if over_cap(layout.size()) {
+            return std::ptr::null_mut();
+        }
         let h = header(layout.align());
         let Ok(outer) = Layout::from_size_align(layout.size() + h, layout.align().max(16)) else {
             return std::ptr::null_mut();
@@ -108,6 +123,9 @@ unsafe impl GlobalAlloc for Counting {
     }
 
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+        if new_size > layout.size() && over_cap(new_size - layout.size()) {
+            return std::ptr::null_mut();
+        }
         let h = header(layout.align());
         // SAFETY: as in dealloc; the header is moved along with the block by System.realloc.
         unsafe {

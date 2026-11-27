@@ -7,3 +7,7 @@ license.workspace = true
 repository.workspace = true
 description = "Embedded fonts, UA stylesheet and ICU data for embedded-browser"
 publish = false
+
+# The font files are Noto Sans (Apache-2.0, fonts/LICENSE-2.0.txt), taken from the
+# `ttf-noto-sans` 0.1.2 crate that M0 measured with. They are committed so the
+# reference-screenshot container can mount exactly the same files.

@@ -89,7 +89,9 @@ Owner calls are the purple shape. A decided owner call is drawn; an open one is 
 ## Ratings
 
 <!-- BEGIN GENERATED: ratings -->
-5 of 5 rated nodes are confirmed by the owner.
+5 of 6 rated nodes are confirmed by the owner.
+
+Not yet confirmed: `eng-m1-host-mvp`.
 <!-- END GENERATED: ratings -->
 
 ## Overview
@@ -103,11 +105,9 @@ flowchart TB
         plat_boards_p4_first{{"plat · ✔ ESP32-P4<br/>first, then S3"}}
         ci_workspace_skeleton["ci · ✔ Workspace<br/>skeleton"]
         eng_m0_go_no_go{{"eng · ✔ M0 go or no-go"}}
+        eng_m1_render["eng · ✔ M1 render<br/>slice"]
     end
-    subgraph bd_1["Next"]
-        eng_m1_host_mvp["eng · ○ M1 host MVP"]
-    end
-    subgraph bd_2["Later (blocked or parked)"]
+    subgraph bd_1["Later (blocked or parked)"]
         plat_h1_p4_gate[/"plat · ⛔ H1 ESP32-P4<br/>hardware gate"/]
         plat_m2_p4_firmware["plat · ⛔ M2 P4<br/>firmware"]
         plat_m3_s3_firmware["plat · ⛔ M3 S3<br/>firmware"]
@@ -116,16 +116,14 @@ flowchart TB
     eng_std_only_esp_idf ~~~ ci_workspace_skeleton
     js_no_js_in_v1 ~~~ eng_m0_go_no_go
     plat_boards_p4_first ~~~ eng_m0_go_no_go
-    ci_workspace_skeleton ~~~ eng_m1_host_mvp
-    eng_m0_go_no_go ~~~ eng_m1_host_mvp
-    eng_m1_host_mvp ~~~ plat_h1_p4_gate
+    ci_workspace_skeleton ~~~ eng_m1_render
+    eng_m0_go_no_go ~~~ eng_m1_render
+    eng_m1_render ~~~ plat_h1_p4_gate
     plat_h1_p4_gate ~~~ plat_m2_p4_firmware
     plat_h1_p4_gate ~~~ plat_m3_s3_firmware
     plat_h1_p4_gate ~~~ js_j3_remote_mode
-    eng_m0_go_no_go --> eng_m1_host_mvp
+    eng_m0_go_no_go --> eng_m1_render
     plat_h1_p4_gate --> plat_m2_p4_firmware
-    eng_m1_host_mvp --> plat_m2_p4_firmware
-    eng_m1_host_mvp --> plat_m3_s3_firmware
     classDef vsucc fill:#2e9e4f,stroke:#1b6b34,color:#fff
     classDef succ fill:#bfe8c8,stroke:#2e9e4f,color:#111
     classDef mixed fill:#ffd37a,stroke:#c98a00,color:#111
@@ -141,8 +139,7 @@ flowchart TB
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
     class eng_std_only_esp_idf,js_no_js_in_v1,plat_boards_p4_first,eng_m0_go_no_go decided
-    class ci_workspace_skeleton unrated
-    class eng_m1_host_mvp next
+    class ci_workspace_skeleton,eng_m1_render unrated
     class plat_h1_p4_gate,plat_m2_p4_firmware,plat_m3_s3_firmware blocked
     class js_j3_remote_mode parked
 ```
@@ -155,8 +152,11 @@ flowchart TB
 |---|---|---|
 | Target ESP-IDF std only | ✔ done · n/a | All Servo parts need std, so the engine runs on ESP-IDF std boards only; no_std chips are out. |
 | M0 go or no-go | ✔ done · n/a | The owner chose go with Blitz: it builds for the P4 with two shallow shims, the image is 6.3 MiB and peak heap is at most 10.5 MB. |
-| M1 host MVP | ○ next | The core engine and simulator render the test pages on a PC, and taps follow links. |
-| M1 side-by-side review | ⛔ blocked | The owner compares our rendering with a real browser and signs off. |
+| M1 render slice | ✔ done · unrated | The core library and the PC simulator load and draw the test pages, redrawing only what changed, within the memory budget. |
+| M1 touch, events and forms | ○ next | Tapping the screen follows links, presses buttons and focuses form fields; the simulator turns mouse clicks into taps. |
+| M1 scroll strip cache | ○ next | Dragging scrolls the page smoothly by copying from pre-drawn strips, drawing new strips a little at a time. |
+| M1 on-screen keyboard | ⛔ blocked | A small keyboard drawn on the screen lets you type into text fields. |
+| M1 side-by-side review | ○ next | The owner compares our rendering with a real browser and signs off. |
 | Shadow DOM in Blitz | ⏸ parked | Contribute shadow DOM support to Blitz, the path to running Home Assistant on the device. Tracked, not planned. |
 | Fork fix for 64-bit atomics | ⏸ parked | blitz-dom and anyrender use 64-bit atomics everywhere; patching our own fork of them would let us drop the custom target specs. |
 | Fork fix for font file mapping | ⏸ parked | The font library maps font files into memory, which ESP-IDF can't do; we swap in a stand-in that reads them instead. |
@@ -179,7 +179,8 @@ flowchart TB
 <!-- BEGIN GENERATED: ready-now -->
 **host**
 
-- `eng-m1-host-mvp`: M1 host MVP
+- `eng-m1-touch-events-forms`: M1 touch, events and forms
+- `eng-m1-scroll-strip-cache`: M1 scroll strip cache
 
 **docker**
 
@@ -215,7 +216,7 @@ Generated on 2026-11-27.
 ## Done, by month
 
 <!-- BEGIN GENERATED: done-by-month -->
-<details><summary><b>Nov 2026</b>: 13 done</summary>
+<details><summary><b>Nov 2026</b>: 14 done, 1 abandoned</summary>
 
 - `ci-emulation-check`: Check ESP32 emulation options (✔ done · mixed). See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3.
 - `ci-workspace-skeleton`: Workspace skeleton (✔ done · unrated). Empty Cargo workspace, ADRs 0001-0006, this roadmap and a first CI workflow.
@@ -224,6 +225,8 @@ Generated on 2026-11-27.
 - `doc-public-repo`: Make the repository public (✔ done · n/a). The repository is public under MIT OR Apache-2.0, so test pages must be safe to publish.
 - `eng-blitz-builds-esp`: Blitz builds for ESP32 targets (✔ done · mixed). Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads.
 - `eng-m0-go-no-go`: M0 go or no-go (✔ done · n/a). The owner chose go with Blitz: it builds for the P4 with two shallow shims, the image is 6.3 MiB and peak heap is at most 10.5 MB.
+- `eng-m1-host-mvp`: M1 host MVP (↷ superseded). The core engine and simulator render the test pages on a PC, and taps follow links. Split into rendering, input, scrolling and keyboard slices.
+- `eng-m1-render`: M1 render slice (✔ done · unrated). The core library and the PC simulator load and draw the test pages, redrawing only what changed, within the memory budget.
 - `eng-peak-heap`: Measure peak heap by category (✔ done · successful). Measure how much memory the engine needs for each corpus page, split by what uses it.
 - `eng-raster-estimate`: Estimate raster speed (✔ done · mixed). Time the two software rasterizers on the host to guess how fast the P4 will draw.
 - `eng-std-only-esp-idf`: Target ESP-IDF std only (✔ done · n/a). All Servo parts need std, so the engine runs on ESP-IDF std boards only; no_std chips are out.
@@ -239,7 +242,7 @@ Generated on 2026-11-27.
 <!-- BEGIN GENERATED: tracks -->
 Each track has its own page with its tree, node table and per-node details.
 
-- [eng - engine](roadmap/tracks/eng.md): 10 nodes (5 done, 1 next, 1 blocked, 3 parked)
+- [eng - engine](roadmap/tracks/eng.md): 14 nodes (6 done, 3 next, 1 blocked, 3 parked, 1 abandoned)
 - [plat - platform](roadmap/tracks/plat.md): 6 nodes (1 done, 1 next, 4 blocked)
 - [js - JavaScript](roadmap/tracks/js.md): 6 nodes (2 done, 4 parked)
 - [ci - build and test](roadmap/tracks/ci.md): 2 nodes (2 done)

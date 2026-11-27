@@ -7,3 +7,20 @@ license.workspace = true
 repository.workspace = true
 description = "Web renderer for ESP32 touch panels, built on Servo components via Blitz"
 publish = true
+
+[dependencies]
+embedded-browser-assets = { path = "../embedded-browser-assets" }
+embedded-graphics-core = "0.4"
+# Blitz pinned per ADR 0002, minimal features as measured in M0 (tools/measure):
+# no system fonts, ICU text-transform, a11y, net, SVG; `floats` on for articles.
+blitz-dom = { version = "=0.3.0-beta.6", default-features = false, features = ["floats"] }
+blitz-html = { version = "=0.3.0-beta.6", default-features = false }
+blitz-paint = { version = "=0.3.0-beta.6", default-features = false }
+blitz-traits = { version = "=0.3.0-beta.6", default-features = false }
+anyrender = "0.15"
+anyrender_vello_cpu = { version = "0.19", default-features = false }
+parley = { version = "0.13", default-features = false, features = ["std"] }
+url = "2"
+data-url = "0.3"
+# blitz-dom pulls `image` with no codecs; PNG, JPEG and GIF as in M0.
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif"] }

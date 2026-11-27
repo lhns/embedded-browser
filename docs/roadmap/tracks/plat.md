@@ -50,8 +50,8 @@ flowchart TB
 | `plat-boards-p4-first` | ESP32-P4 first, then S3 | owner-decision | owner | done | n/a | 2026-11-27 | 2026-11-27 |  |  |  |  | planning session 2026-11-27 |
 | `plat-h1-p4-gate` | H1 ESP32-P4 hardware gate | experiment | hardware | blocked | unrated |  |  | eng-blitz-builds-esp |  |  |  |  |
 | `plat-h2-s3-gate` | H2 ESP32-S3 hardware gate | experiment | hardware | blocked | unrated |  |  | eng-blitz-builds-esp |  |  |  |  |
-| `plat-m2-p4-firmware` | M2 P4 firmware | feature | hardware | blocked | unrated |  |  | plat-h1-p4-gate, eng-m1-host-mvp |  |  |  |  |
-| `plat-m3-s3-firmware` | M3 S3 firmware | feature | hardware | blocked | unrated |  |  | plat-h2-s3-gate, eng-m1-host-mvp |  |  |  |  |
+| `plat-m2-p4-firmware` | M2 P4 firmware | feature | hardware | blocked | unrated |  |  | plat-h1-p4-gate, eng-m1-side-by-side-review, eng-m1-touch-events-forms, eng-m1-scroll-strip-cache |  |  |  |  |
+| `plat-m3-s3-firmware` | M3 S3 firmware | feature | hardware | blocked | unrated |  |  | plat-h2-s3-gate, eng-m1-side-by-side-review, eng-m1-touch-events-forms, eng-m1-scroll-strip-cache |  |  |  |  |
 | `plat-defect-s3-paint-crash` | S3 crash in first paint | defect | docker | next | unrated | 2026-11-27 |  | eng-blitz-builds-esp |  |  |  | docs/m0/emulation-results.md |
 
 ### Details per node

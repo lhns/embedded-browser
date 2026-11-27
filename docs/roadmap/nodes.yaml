@@ -242,31 +242,107 @@
   title: "M1 host MVP"
   track: eng
   kind: feature
+  state: abandoned
+  outcome: superseded
+  evidence: []
+  verdict_quote: "Split eng-m1-host-mvp if the slicing makes that cleaner, following the tech-tree granularity rules: one verdict per node."
+  headline: "Split into slices with one verdict each"
+  depends_on: [eng-m0-go-no-go]
+  replaced_by: [eng-m1-render, eng-m1-touch-events-forms, eng-m1-scroll-strip-cache, eng-m1-onscreen-keyboard]
+  lane: host
+  start: 2026-11-27
+  end: 2026-11-27
+  folded: []
+  overview: false
+  plain: "The core engine and simulator render the test pages on a PC, and taps follow links. Split into rendering, input, scrolling and keyboard slices."
+  notes: "Done when: the core and simulator render the corpus, taps navigate, the capped-heap test passes, and each page has a reference screenshot from a real browser at the same viewport with JS off. Split on 2026-11-27 into eng-m1-render, eng-m1-touch-events-forms, eng-m1-scroll-strip-cache and eng-m1-onscreen-keyboard."
+
+- id: eng-m1-render
+  title: "M1 render slice"
+  track: eng
+  kind: feature
+  state: done
+  outcome: unrated
+  evidence: ["docs/adr/0003-core-api-single-dom-thread.md", "docs/m1/side-by-side.md", "crates/embedded-browser", "testpages/golden"]
+  verdict_quote: ""
+  headline: "Corpus renders in damage-limited bands; heap under the P4 cap"
+  depends_on: [eng-m0-go-no-go]
+  replaced_by: []
+  lane: host
+  start: 2026-11-27
+  end: 2026-11-27
+  folded: []
+  overview: true
+  plain: "The core library and the PC simulator load and draw the test pages, redrawing only what changed, within the memory budget."
+  notes: "Done when: the core API (Config, Limits, non-blocking Net, Browser load/tick/render/render_raw, DamageRects) renders the corpus in RGB565 bands with damage-limited, x-clipped re-raster; goldens pass in cargo test; reference screenshots from headless Chromium are committed; the heap-cap CI job passes at 12 MB on wasm32."
+
+- id: eng-m1-touch-events-forms
+  title: "M1 touch, events and forms"
+  track: eng
+  kind: feature
   state: next
   outcome: unrated
   evidence: []
   verdict_quote: ""
   headline: ""
-  depends_on: [eng-m0-go-no-go]
+  depends_on: [eng-m1-render]
   replaced_by: []
   lane: host
   start: ""
   end: ""
   folded: []
-  overview: true
-  plain: "The core engine and simulator render the test pages on a PC, and taps follow links."
-  notes: "Done when: the core and simulator render the corpus, taps navigate, the capped-heap test passes, and each page has a reference screenshot from a real browser at the same viewport with JS off."
+  overview: false
+  plain: "Tapping the screen follows links, presses buttons and focuses form fields; the simulator turns mouse clicks into taps."
+  notes: "Done when: touch hit-testing with :active/focus, an EventSink with default actions after dispatch (ADR 0003), link navigation, form submit and checkboxes work in the simulator with the mouse, with tests."
+
+- id: eng-m1-scroll-strip-cache
+  title: "M1 scroll strip cache"
+  track: eng
+  kind: feature
+  state: next
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [eng-m1-render]
+  replaced_by: []
+  lane: host
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "Dragging scrolls the page smoothly by copying from pre-drawn strips, drawing new strips a little at a time."
+  notes: "Done when: drag scroll blits from a cache of rasterized strips (about one screen above and below), new strips are rasterized one band per tick, position:fixed elements no longer repeat per band, and the cache size is counted in the heap-cap test."
+
+- id: eng-m1-onscreen-keyboard
+  title: "M1 on-screen keyboard"
+  track: eng
+  kind: feature
+  state: blocked
+  outcome: unrated
+  evidence: []
+  verdict_quote: ""
+  headline: ""
+  depends_on: [eng-m1-touch-events-forms]
+  replaced_by: []
+  lane: host
+  start: ""
+  end: ""
+  folded: []
+  overview: false
+  plain: "A small keyboard drawn on the screen lets you type into text fields."
+  notes: "Done when: focusing a text input shows a Rust-drawn keyboard overlay, typing edits the field, and the edit re-rasters only the damaged area."
 
 - id: eng-m1-side-by-side-review
   title: "M1 side-by-side review"
   track: eng
   kind: owner-decision
-  state: blocked
+  state: next
   outcome: n/a
   evidence: []
   verdict_quote: ""
   headline: ""
-  depends_on: [eng-m1-host-mvp]
+  depends_on: [eng-m1-render]
   replaced_by: []
   lane: owner
   start: ""
@@ -323,7 +399,7 @@
   evidence: []
   verdict_quote: ""
   headline: ""
-  depends_on: [plat-h1-p4-gate, eng-m1-host-mvp]
+  depends_on: [plat-h1-p4-gate, eng-m1-side-by-side-review, eng-m1-touch-events-forms, eng-m1-scroll-strip-cache]
   replaced_by: []
   lane: hardware
   start: ""
@@ -342,7 +418,7 @@
   evidence: []
   verdict_quote: ""
   headline: ""
-  depends_on: [plat-h2-s3-gate, eng-m1-host-mvp]
+  depends_on: [plat-h2-s3-gate, eng-m1-side-by-side-review, eng-m1-touch-events-forms, eng-m1-scroll-strip-cache]
   replaced_by: []
   lane: hardware
   start: ""
