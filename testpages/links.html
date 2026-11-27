@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1024, initial-scale=1">
+<title>Link News</title>
+<!-- Synthetic link-aggregator page with forms; titles are generated. -->
+<style>
+  body { margin: 0; background: white; font-family: sans-serif; font-size: 13px; }
+  #wrap { width: 85%; margin: 8px auto; background: #f6f6ef; }
+  #bar { background: #ff6600; padding: 2px 4px; display: flex; align-items: center; gap: 8px; }
+  #bar .logo { border: 1px solid white; color: white; font-weight: bold; width: 18px; height: 18px; text-align: center; line-height: 18px; }
+  #bar b { color: black; }
+  #bar a { color: black; text-decoration: none; }
+  #bar .right { margin-left: auto; }
+  table.items { border-collapse: collapse; margin: 6px 0; }
+  td { padding: 0 2px; }
+  td.rank { color: #828282; text-align: right; vertical-align: top; width: 30px; }
+  td.vote a.up { display: inline-block; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent;
+                 border-bottom: 9px solid #9a9a9a; margin: 3px 2px 0; }
+  td.title a { color: black; text-decoration: none; font-size: 14px; }
+  .site, td.sub, td.sub a { color: #828282; font-size: 11px; text-decoration: none; }
+  tr.spacer td { height: 5px; }
+  form { margin: 8px 12px; }
+  fieldset { border: 1px solid #c0c0b0; padding: 8px; margin-bottom: 10px; }
+  label { display: inline-block; width: 80px; }
+  input[type=text], input[type=password], textarea { border: 1px solid #a0a0a0; padding: 2px 4px; font-size: 13px; }
+  textarea { width: 420px; height: 70px; }
+  button { padding: 2px 10px; }
+  #foot { border-top: 2px solid #ff6600; text-align: center; padding: 10px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+<div id="bar"><span class="logo">L</span><b>Link News</b><a href="#">new</a> | <a href="#">past</a> | <a href="#">ask</a> | <a href="#">submit</a><span class="right"><a href="#">login</a></span></div>
+<table class="items"><tr class="athing"><td class="rank">1.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Archive mill guild mill parish chronicle wool century lighthouse</a> <span class="site">(example.org)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">195 points by user569 13 hours ago | <a href="#">hide</a> | <a href="#">184&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">2.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">District census bridge bridge river railway valley</a> <span class="site">(example.org)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">741 points by user907 16 hours ago | <a href="#">hide</a> | <a href="#">336&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">3.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Bridge station bridge charter canal parish century</a> <span class="site">(blog.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">524 points by user435 18 hours ago | <a href="#">hide</a> | <a href="#">230&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">4.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Orchard timber century parish river ferry granite</a> <span class="site">(news.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">278 points by user421 18 hours ago | <a href="#">hide</a> | <a href="#">295&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">5.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Harbour harbour lighthouse estuary cathedral lighthouse</a> <span class="site">(example.com)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">148 points by user748 17 hours ago | <a href="#">hide</a> | <a href="#">384&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">6.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Canal dialect station dialect station granite</a> <span class="site">(blog.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">648 points by user760 22 hours ago | <a href="#">hide</a> | <a href="#">342&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">7.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Chronicle tram council museum</a> <span class="site">(news.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">800 points by user12 16 hours ago | <a href="#">hide</a> | <a href="#">232&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">8.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Lighthouse museum charter orchard census census province harbour</a> <span class="site">(news.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">770 points by user312 19 hours ago | <a href="#">hide</a> | <a href="#">133&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">9.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Lighthouse province council census</a> <span class="site">(news.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">30 points by user294 16 hours ago | <a href="#">hide</a> | <a href="#">42&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">10.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Vineyard railway population festival bridge</a> <span class="site">(news.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">290 points by user282 9 hours ago | <a href="#">hide</a> | <a href="#">7&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">11.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Cathedral century district quarry estuary century festival granite ferry</a> <span class="site">(example.org)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">821 points by user541 2 hours ago | <a href="#">hide</a> | <a href="#">175&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">12.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">District district ferry charter</a> <span class="site">(blog.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">246 points by user677 15 hours ago | <a href="#">hide</a> | <a href="#">371&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">13.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Province wool orchard council festival cathedral council province canal</a> <span class="site">(blog.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">490 points by user309 16 hours ago | <a href="#">hide</a> | <a href="#">382&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">14.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Timber mill mill lighthouse festival district dialect parish</a> <span class="site">(example.com)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">298 points by user950 15 hours ago | <a href="#">hide</a> | <a href="#">195&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">15.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Archive dialect harbour market chronicle orchard parish population museum</a> <span class="site">(example.net)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">276 points by user822 4 hours ago | <a href="#">hide</a> | <a href="#">130&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">16.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Guild canal granite trade dialect museum century archive river</a> <span class="site">(example.com)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">854 points by user70 1 hours ago | <a href="#">hide</a> | <a href="#">210&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">17.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Dialect market quarry orchard</a> <span class="site">(example.org)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">745 points by user291 9 hours ago | <a href="#">hide</a> | <a href="#">98&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">18.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Valley station council wool</a> <span class="site">(news.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">656 points by user125 23 hours ago | <a href="#">hide</a> | <a href="#">61&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">19.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Bridge mill century cathedral</a> <span class="site">(example.org)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">262 points by user302 15 hours ago | <a href="#">hide</a> | <a href="#">338&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">20.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Canal population parish archive</a> <span class="site">(example.net)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">168 points by user800 3 hours ago | <a href="#">hide</a> | <a href="#">141&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">21.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Mill mill museum council</a> <span class="site">(example.net)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">835 points by user272 6 hours ago | <a href="#">hide</a> | <a href="#">225&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">22.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Ferry trade guild century</a> <span class="site">(blog.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">114 points by user148 18 hours ago | <a href="#">hide</a> | <a href="#">393&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">23.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Wool market quarry festival market harbour railway</a> <span class="site">(example.com)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">588 points by user746 9 hours ago | <a href="#">hide</a> | <a href="#">397&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">24.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Valley ferry district river harbour mill population</a> <span class="site">(example.org)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">719 points by user338 13 hours ago | <a href="#">hide</a> | <a href="#">294&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">25.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Vineyard ferry lighthouse parish</a> <span class="site">(blog.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">867 points by user746 3 hours ago | <a href="#">hide</a> | <a href="#">276&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">26.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">River mill lighthouse cathedral chronicle</a> <span class="site">(example.net)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">344 points by user699 10 hours ago | <a href="#">hide</a> | <a href="#">205&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">27.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Station estuary chronicle museum</a> <span class="site">(example.com)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">864 points by user471 10 hours ago | <a href="#">hide</a> | <a href="#">331&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">28.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Century harbour mill trade tram</a> <span class="site">(blog.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">112 points by user646 23 hours ago | <a href="#">hide</a> | <a href="#">183&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">29.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Station quarry trade bridge harbour trade valley</a> <span class="site">(news.example)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">247 points by user501 13 hours ago | <a href="#">hide</a> | <a href="#">32&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr><tr class="athing"><td class="rank">30.</td><td class="vote"><a href="#" class="up"></a></td>
+<td class="title"><a href="#">Tram ferry chronicle quarry valley harbour museum council</a> <span class="site">(example.net)</span></td></tr>
+<tr><td colspan="2"></td><td class="sub">809 points by user739 2 hours ago | <a href="#">hide</a> | <a href="#">207&nbsp;comments</a></td></tr>
+<tr class="spacer"><td colspan="3"></td></tr></table>
+<form action="#" method="post"><fieldset><legend>Login</legend>
+<div><label for="u">username:</label><input type="text" id="u" name="u" size="20"></div>
+<div><label for="p">password:</label><input type="password" id="p" name="p" size="20"></div>
+<div><input type="checkbox" id="r" name="r" checked> <span>remember me</span> <button type="submit">login</button></div>
+</fieldset></form>
+<form action="#" method="post"><fieldset><legend>Add comment</legend>
+<textarea name="text">Write something kind.</textarea><br>
+<select name="sort"><option>newest</option><option>top</option></select> <button type="submit">add comment</button>
+</fieldset></form>
+<div id="foot"><form action="#">Search: <input type="text" name="q" size="17"></form></div>
+</div>
+</body>
+</html>

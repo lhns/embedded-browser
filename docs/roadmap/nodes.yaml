@@ -147,39 +147,39 @@
   title: "Measure peak heap by category"
   track: eng
   kind: experiment
-  state: next
+  state: done
   outcome: unrated
-  evidence: []
+  evidence: ["docs/m0/host-results.md"]
   verdict_quote: ""
-  headline: ""
+  headline: "32-bit peak 1.1-3.6 MB on synthetic pages, 8.7 MB on a Wikipedia article (P4 go; S3 only for small pages)"
   depends_on: [ci-workspace-skeleton]
   replaced_by: []
   lane: host
-  start: ""
-  end: ""
+  start: 2026-11-27
+  end: 2026-11-27
   folded: []
   overview: false
   plain: "Measure how much memory the engine needs for each corpus page, split by what uses it."
-  notes: "Done when: peak heap on a 32-bit host (i686 or wasm32) is recorded per category (DOM/style/layout, text/glyphs, images, net) for the corpus, against go (<=12MB), fallback (12-20MB) and stop (>20MB); the S3 8MB tier needs <=4MB. Home Assistant is a static HA-like page or post-script DOM snapshot."
+  notes: "Done when: peak heap on a 32-bit host (i686 or wasm32) is recorded per category (DOM/style/layout, text/glyphs, images, net) for the corpus, against go (<=12MB), fallback (12-20MB) and stop (>20MB); the S3 8MB tier needs <=4MB. Home Assistant is a static HA-like page or post-script DOM snapshot. Result: wasm32-wasip1 (i686-msvc fails an anyrender size assert), engine + 32px vello_cpu bands: dashboard 1.10, article 3.58, links 1.72, HN 2.13, Wikipedia 8.65 MB; a full RGBA frame adds ~3.2 MB. Sequential styling spawns no threads."
 
 - id: eng-raster-estimate
   title: "Estimate raster speed"
   track: eng
   kind: experiment
-  state: next
+  state: done
   outcome: unrated
-  evidence: []
+  evidence: ["docs/m0/host-results.md"]
   verdict_quote: ""
-  headline: ""
+  headline: "Provisional P4 full frame ~0.1-0.7 s with vello_cpu, up to 3.3 s with tiny-skia; banding works; Stylo damage is readable"
   depends_on: [ci-workspace-skeleton]
   replaced_by: []
   lane: host
-  start: ""
-  end: ""
+  start: 2026-11-27
+  end: 2026-11-27
   folded: []
   overview: false
   plain: "Time the two software rasterizers on the host to guess how fast the P4 will draw."
-  notes: "Done when: vello_cpu and tiny-skia are timed with scalar code paths and the size-build profile, derated by a CoreMark ratio as a provisional estimate; banded paint_scene is verified and any damage source in Blitz is identified."
+  notes: "Done when: vello_cpu and tiny-skia are timed with scalar code paths and the size-build profile, derated by a CoreMark ratio as a provisional estimate; banded paint_scene is verified and any damage source in Blitz is identified. Result: scalar via wasm32 (no simd128) x5.4 CoreMark derate (P4 single core assumed 1245 at 360 MHz), PSRAM penalty not modelled. Banding via viewport scroll matches the full frame (vello_cpu <=3 px). RestyleDamage readable between resolve_stylist and resolve; highlight re-raster estimate ~0.33 s."
 
 - id: ci-emulation-check
   title: "Check ESP32 emulation options"
