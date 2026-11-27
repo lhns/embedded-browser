@@ -10,7 +10,7 @@ Scope: parse, style, layout, paint, events.
 ```mermaid
 flowchart TB
     eng_std_only_esp_idf{{"✔ Target ESP-IDF std<br/>only"}}
-    eng_blitz_builds_esp[/"○ Blitz builds for<br/>ESP32 targets"/]
+    eng_blitz_builds_esp[/"✔ Blitz builds for<br/>ESP32 targets"/]
     eng_peak_heap[/"○ Measure peak heap by<br/>category"/]
     eng_raster_estimate[/"○ Estimate raster<br/>speed"/]
     eng_m1_host_mvp["⛔ M1 host MVP"]
@@ -35,7 +35,8 @@ flowchart TB
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
     class eng_std_only_esp_idf decided
-    class eng_blitz_builds_esp,eng_peak_heap,eng_raster_estimate next
+    class eng_blitz_builds_esp unrated
+    class eng_peak_heap,eng_raster_estimate next
     class eng_m1_host_mvp blocked
     class eng_shadow_dom_upstream parked
 ```
@@ -47,7 +48,7 @@ flowchart TB
 | id | title | kind | lane | state | outcome | start | end | depends_on | replaced_by | qualified_by | headline | evidence |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `eng-std-only-esp-idf` | Target ESP-IDF std only | owner-decision | owner | done | n/a | 2026-11-27 | 2026-11-27 |  |  |  |  | docs/adr/0001-std-only-esp-idf-targets.md |
-| `eng-blitz-builds-esp` | Blitz builds for ESP32 targets | experiment | docker | next | unrated |  |  | ci-workspace-skeleton |  |  |  |  |
+| `eng-blitz-builds-esp` | Blitz builds for ESP32 targets | experiment | docker | done | unrated | 2026-11-27 | 2026-11-27 | ci-workspace-skeleton |  |  | Builds for P4 and S3 with two small shims, no Stylo changes; P4 image 5.8 MiB | docs/m0/esp-build-results.md |
 | `eng-peak-heap` | Measure peak heap by category | experiment | host | next | unrated |  |  | ci-workspace-skeleton |  |  |  |  |
 | `eng-raster-estimate` | Estimate raster speed | experiment | host | next | unrated |  |  | ci-workspace-skeleton |  |  |  |  |
 | `eng-m0-go-no-go` | M0 go or no-go | owner-decision | owner | blocked | n/a |  |  | eng-blitz-builds-esp, eng-peak-heap |  |  |  |  |
@@ -60,7 +61,7 @@ flowchart TB
 | id | title | verdict | headline | in plain words | notes | confirmed | waiting on | queue order | order reason |
 |---|---|---|---|---|---|---|---|---|---|
 | `eng-std-only-esp-idf` | Target ESP-IDF std only |  |  | All Servo parts need std, so the engine runs on ESP-IDF std boards only; no_std chips are out. |  |  |  |  |  |
-| `eng-blitz-builds-esp` | Blitz builds for ESP32 targets |  |  | Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads. | Done when: hello-Blitz compiles for the P4 (and S3, compile-only), 64-bit atomics availability is recorded, sequential Stylo is confirmed thread-free, the P4 image size is recorded against the go (<=8MB), fallback (8-14MB) and stop (>14MB) thresholds, and a hello firmware that prints timings over serial is ready for H1. |  |  |  |  |
+| `eng-blitz-builds-esp` | Blitz builds for ESP32 targets |  | Builds for P4 and S3 with two small shims, no Stylo changes; P4 image 5.8 MiB | Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads. | Done when: hello-Blitz compiles for the P4 (and S3, compile-only), 64-bit atomics availability is recorded, sequential Stylo is confirmed thread-free, the P4 image size is recorded against the go (<=8MB), fallback (8-14MB) and stop (>14MB) thresholds, and a hello firmware that prints timings over serial is ready for H1. Result: P4 and S3 (compile-only) build with Blitz =0.3.0-beta.6 unmodified, using a memmap2 stand-in and a target spec with 64-bit atomics as ESP-IDF libcalls; neither target has 64-bit atomics natively. P4 app image 6,081,152 bytes (go band), S3 6,336,288. Sequential Stylo spawned no threads on a Linux host run. Open: S3 Arc/atomics on PSRAM are unsafe with the stock Xtensa target (inline S32C1I), so H2 must check it; P4 images default to chip rev v3.01+. |  |  |  |  |
 | `eng-peak-heap` | Measure peak heap by category |  |  | Measure how much memory the engine needs for each corpus page, split by what uses it. | Done when: peak heap on a 32-bit host (i686 or wasm32) is recorded per category (DOM/style/layout, text/glyphs, images, net) for the corpus, against go (<=12MB), fallback (12-20MB) and stop (>20MB); the S3 8MB tier needs <=4MB. Home Assistant is a static HA-like page or post-script DOM snapshot. |  |  |  |  |
 | `eng-raster-estimate` | Estimate raster speed |  |  | Time the two software rasterizers on the host to guess how fast the P4 will draw. | Done when: vello_cpu and tiny-skia are timed with scalar code paths and the size-build profile, derated by a CoreMark ratio as a provisional estimate; banded paint_scene is verified and any damage source in Blitz is identified. |  |  |  |  |
 | `eng-m0-go-no-go` | M0 go or no-go |  |  | The owner decides from the host numbers whether to build on Blitz, switch to a smaller engine, or stop. | Done when: the owner has read the M0 numbers (build, image size, peak heap) and chosen go, fallback or stop. Go means M1 starts; fallback or stop always comes back to the owner. |  |  |  |  |

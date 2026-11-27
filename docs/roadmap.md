@@ -148,7 +148,6 @@ flowchart TB
 | title | status | in plain words |
 |---|---|---|
 | Target ESP-IDF std only | ✔ done · n/a | All Servo parts need std, so the engine runs on ESP-IDF std boards only; no_std chips are out. |
-| Blitz builds for ESP32 targets | ○ next | Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads. |
 | Measure peak heap by category | ○ next | Measure how much memory the engine needs for each corpus page, split by what uses it. |
 | Estimate raster speed | ○ next | Time the two software rasterizers on the host to guess how fast the P4 will draw. |
 | M0 go or no-go | ⛔ blocked | The owner decides from the host numbers whether to build on Blitz, switch to a smaller engine, or stop. |
@@ -181,7 +180,6 @@ flowchart TB
 
 **docker**
 
-- `eng-blitz-builds-esp`: Blitz builds for ESP32 targets
 - `ci-emulation-check`: Check ESP32 emulation options
 <!-- END GENERATED: ready-now -->
 
@@ -215,12 +213,13 @@ Generated on 2026-11-27.
 ## Done, by month
 
 <!-- BEGIN GENERATED: done-by-month -->
-<details><summary><b>Nov 2026</b>: 7 done</summary>
+<details><summary><b>Nov 2026</b>: 8 done</summary>
 
 - `ci-workspace-skeleton`: Workspace skeleton (✔ done · unrated). Empty Cargo workspace, ADRs 0001-0006, this roadmap and a first CI workflow.
 - `doc-corpus-choice`: Choose the test page corpus (✔ done · n/a). Test pages are Home Assistant-like, server-rendered sites and a simple custom dashboard.
 - `doc-name-embedded-browser`: Name the project (✔ done · n/a). The owner chose the name embedded-browser.
 - `doc-public-repo`: Make the repository public (✔ done · n/a). The repository is public under MIT OR Apache-2.0, so test pages must be safe to publish.
+- `eng-blitz-builds-esp`: Blitz builds for ESP32 targets (✔ done · unrated). Find out whether Blitz compiles for the P4 and S3, how big the P4 image is, and whether Stylo spawns threads.
 - `eng-std-only-esp-idf`: Target ESP-IDF std only (✔ done · n/a). All Servo parts need std, so the engine runs on ESP-IDF std boards only; no_std chips are out.
 - `js-no-js-in-v1`: No JavaScript in v1 (✔ done · n/a). Version 1 renders pages without running scripts; JavaScript is a parallel track.
 - `plat-boards-p4-first`: ESP32-P4 first, then S3 (✔ done · n/a). The ESP32-P4 boards come first, then the two ESP32-S3 boards.
@@ -233,7 +232,7 @@ Generated on 2026-11-27.
 <!-- BEGIN GENERATED: tracks -->
 Each track has its own page with its tree, node table and per-node details.
 
-- [eng - engine](roadmap/tracks/eng.md): 8 nodes (1 done, 3 next, 3 blocked, 1 parked)
+- [eng - engine](roadmap/tracks/eng.md): 8 nodes (2 done, 2 next, 3 blocked, 1 parked)
 - [plat - platform](roadmap/tracks/plat.md): 5 nodes (1 done, 4 blocked)
 - [js - JavaScript](roadmap/tracks/js.md): 6 nodes (1 done, 1 next, 4 parked)
 - [ci - build and test](roadmap/tracks/ci.md): 2 nodes (1 done, 1 next)

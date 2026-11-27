@@ -6,7 +6,7 @@ Roadmap node `eng-blitz-builds-esp`. Measured on 2026-11-27.
 
 | Metric | Result | Band |
 |---|---|---|
-| Builds for P4 (S3 compile-only) | Yes. Needs one small dependency stand-in (memmap2) and a custom target spec (64-bit atomics as libcalls). **No change to Stylo or Blitz.** S3: S3_RESULT | **needs patches** (shallow) |
+| Builds for P4 (S3 compile-only) | Yes. Needs one small dependency stand-in (memmap2) and a custom target spec (64-bit atomics as libcalls). **No change to Stylo or Blitz.** S3 compiles and links with the same shims (6.04 MiB image). | **needs patches** (shallow) |
 | P4 image size | **6,081,152 bytes (5.80 MiB)**, 41% of the 14 MiB factory partition | **go** (≤8 MB) |
 
 - The size is a clear go.
@@ -55,6 +55,13 @@ The firmware is hello-Blitz: std on ESP-IDF v5.5.5, through esp-idf-sys 0.39.
 Blitz's own `log-phase-times` and vello_cpu's `log_frame_times` add the split within each phase: style, construct, layout, and so on, and cmds versus render. The board needs no display.
 
 On the Windows host, the same code drew 439,434 non-background pixels with checksum `a144357b`. The UART output should match that on the device.
+
+**Sequential Stylo spawns no threads.** I confirmed this on a Linux host build of the same firmware (x86_64, in the P4 image), counting `/proc/self/task` after each phase:
+- 1 thread at boot;
+- 2 from the engine-thread start through fonts, parse, style+layout and both paints;
+- 1 at the end.
+
+So rayon's pool is never started. The device prints the same count from FreeRTOS.
 
 ### Blitz features
 These are my choices; the host worker may pick differently, so reconcile at merge.
@@ -110,7 +117,25 @@ On a 20-core Docker VM, with the target dir on a Windows bind mount, a cold buil
 
 ## S3 compile-only build
 
-S3_SECTION
+The S3 build is the same firmware, with nothing changed. Build details:
+- Image: `espressif/idf-rust:esp32s3_1.95.0.0` (esp toolchain 1.95.0.0).
+- ESP-IDF v5.5.5, fetched by esp-idf-sys.
+- `MCU=esp32s3`, `sdkconfig.defaults.esp32s3` (octal PSRAM, 80 MHz).
+- `targets/xtensa-esp32s3-espidf.json`, which is the esp toolchain's spec with `max-atomic-width` 64.
+
+**It builds and links.**
+
+| Section | Bytes |
+|---|---|
+| `.flash.text` | 4,987,120 (4.76 MiB) |
+| `.flash.rodata` | 1,275,456 (1.22 MiB) |
+| `.iram0.text` | 56,355 |
+| **App image** (`espflash save-image`) | **6,336,288 (6.04 MiB)**, 43.16% of the factory partition |
+
+- **Code split:** the same as on the P4, about 4% bigger. Stylo is 1503 KB of text, fonts and text 776 KB, std 724 KB, Blitz 432 KB, raster 414 KB, Taffy 282 KB.
+- **The attribution script's rodata column is wrong on Xtensa:** nm reports DROM symbols as data there. Only the text column is meaningful for the S3.
+- **This proves compile and link only.** The stock S3 target emits inline S32C1I for 32-bit atomics. So `Arc` and `Mutex` on PSRAM-resident data are unsafe on the S3 hardware; see the doc lookups below.
+- **H2 should run this image's atomics check.** It tests exactly that case. If it fails, try a software-atomics target (esp-rs/esp-idf-sys#406) before calling the S3 a fallback-engine board.
 
 ## What is not stock
 Every deviation from the stock toolchain and crates:
