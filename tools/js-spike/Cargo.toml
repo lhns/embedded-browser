@@ -1,0 +1,14 @@
+[package]
+name = "js-spike"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "M0 spike: run corpus scripts in QuickJS-ng under a memory cap with a logging stub DOM"
+publish = false
+
+[dependencies]
+# Bundles quickjs-ng (0.16.2 in rquickjs-sys 0.14.0) with pre-generated bindings for
+# x86_64 Windows/Linux and i686 Linux, so no clang/bindgen is needed on those hosts.
+rquickjs = { version = "0.14.0", default-features = false, features = ["std", "allocator", "loader"] }

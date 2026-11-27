@@ -4,6 +4,7 @@ members = [
     "crates/embedded-browser",
     "crates/embedded-browser-assets",
     "crates/embedded-browser-sim",
+    "tools/js-spike",
     "tools/measure",
 ]
 exclude = ["boards/*"]
@@ -14,3 +15,8 @@ edition = "2024"
 rust-version = "1.91"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/lhns/embedded-browser"
+
+# QuickJS-ng's C interpreter needs optimised stack frames to stay within js-spike's 512 KB
+# JS stack limit in test builds.
+[profile.dev.package.rquickjs-sys]
+opt-level = 2

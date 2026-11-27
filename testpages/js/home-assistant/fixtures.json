@@ -1,0 +1,12 @@
+{
+  "url": "http://homeassistant.local:8123/",
+  "http": [
+    ["/auth/providers", "{\"providers\":[{\"name\":\"Home Assistant Local\",\"type\":\"homeassistant\",\"id\":null}],\"require_payment\":false}", "application/json", "GET"],
+    ["/manifest.json", "{}", "application/json", "GET"]
+  ],
+  "ws": [
+    [null, "{\"type\":\"auth_required\",\"ha_version\":\"2026.11.0\"}"],
+    ["\"type\":\"auth\"", "{\"type\":\"auth_ok\",\"ha_version\":\"2026.11.0\"}"]
+  ],
+  "sse": []
+}
