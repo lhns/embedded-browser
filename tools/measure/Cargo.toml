@@ -26,8 +26,8 @@ parley = { version = "0.13", default-features = false, features = ["std"] }
 kurbo = "0.13"
 url = "2"
 data-url = "0.3"
-# blitz-dom pulls `image` with no codecs; PNG is needed for the corpus images.
-image = { version = "0.25", default-features = false, features = ["png"] }
+# blitz-dom pulls `image` with no codecs: PNG for the corpus, JPEG and GIF for fetched pages.
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif"] }
 rayon = "1"
 ttf-noto-sans = { version = "0.1.2", features = ["regular", "bold"] }
 

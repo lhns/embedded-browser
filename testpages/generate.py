@@ -28,7 +28,7 @@ def dashboard():
     <section class="card{' on' if on else ''}" id="card-{i}">
       <div class="card-head"><span class="icon bulb"></span><h2>{room}</h2>
         <label class="toggle"><input type="checkbox"{' checked' if on else ''}><span></span></label></div>
-      <div class="row"><span class="icon thermo"></span><span class="value">{t:.1f}&nbsp;°C</span><span class="muted">Humidity {40 + i * 3}&nbsp;%</span></div>
+      <div class="row"><span class="icon thermo"></span><span class="value" id="temp-{i}">{t:.1f}&nbsp;°C</span><span class="muted">Humidity {40 + i * 3}&nbsp;%</span></div>
       <div class="bar"><div style="width:{30 + i * 11}%"></div></div>
       <div class="row small"><span>Brightness</span><span class="muted">{30 + i * 11}&nbsp;%</span></div>
     </section>""")
@@ -104,7 +104,7 @@ def dashboard():
   </div>
   <aside>
     <div class="panel weather"><div class="sun"></div><div><div class="temp">21&nbsp;°C</div><div class="muted">Partly cloudy · wind 12&nbsp;km/h</div></div></div>
-    <div class="panel"><h3>Status</h3><ul class="entities">{entities}</ul></div>
+    <div class="panel"><h3>Status</h3><ul class="entities" id="status">{entities}</ul></div>
     <div class="panel"><h3>Energy this week (kWh)</h3><div class="chart">{bars}</div></div>
   </aside>
 </main>

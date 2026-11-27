@@ -63,49 +63,49 @@
     <section class="card on" id="card-0">
       <div class="card-head"><span class="icon bulb"></span><h2>Living room</h2>
         <label class="toggle"><input type="checkbox" checked><span></span></label></div>
-      <div class="row"><span class="icon thermo"></span><span class="value">19.5&nbsp;°C</span><span class="muted">Humidity 40&nbsp;%</span></div>
+      <div class="row"><span class="icon thermo"></span><span class="value" id="temp-0">19.5&nbsp;°C</span><span class="muted">Humidity 40&nbsp;%</span></div>
       <div class="bar"><div style="width:30%"></div></div>
       <div class="row small"><span>Brightness</span><span class="muted">30&nbsp;%</span></div>
     </section>
     <section class="card" id="card-1">
       <div class="card-head"><span class="icon bulb"></span><h2>Kitchen</h2>
         <label class="toggle"><input type="checkbox"><span></span></label></div>
-      <div class="row"><span class="icon thermo"></span><span class="value">20.2&nbsp;°C</span><span class="muted">Humidity 43&nbsp;%</span></div>
+      <div class="row"><span class="icon thermo"></span><span class="value" id="temp-1">20.2&nbsp;°C</span><span class="muted">Humidity 43&nbsp;%</span></div>
       <div class="bar"><div style="width:41%"></div></div>
       <div class="row small"><span>Brightness</span><span class="muted">41&nbsp;%</span></div>
     </section>
     <section class="card on" id="card-2">
       <div class="card-head"><span class="icon bulb"></span><h2>Bedroom</h2>
         <label class="toggle"><input type="checkbox" checked><span></span></label></div>
-      <div class="row"><span class="icon thermo"></span><span class="value">20.9&nbsp;°C</span><span class="muted">Humidity 46&nbsp;%</span></div>
+      <div class="row"><span class="icon thermo"></span><span class="value" id="temp-2">20.9&nbsp;°C</span><span class="muted">Humidity 46&nbsp;%</span></div>
       <div class="bar"><div style="width:52%"></div></div>
       <div class="row small"><span>Brightness</span><span class="muted">52&nbsp;%</span></div>
     </section>
     <section class="card" id="card-3">
       <div class="card-head"><span class="icon bulb"></span><h2>Office</h2>
         <label class="toggle"><input type="checkbox"><span></span></label></div>
-      <div class="row"><span class="icon thermo"></span><span class="value">21.6&nbsp;°C</span><span class="muted">Humidity 49&nbsp;%</span></div>
+      <div class="row"><span class="icon thermo"></span><span class="value" id="temp-3">21.6&nbsp;°C</span><span class="muted">Humidity 49&nbsp;%</span></div>
       <div class="bar"><div style="width:63%"></div></div>
       <div class="row small"><span>Brightness</span><span class="muted">63&nbsp;%</span></div>
     </section>
     <section class="card on" id="card-4">
       <div class="card-head"><span class="icon bulb"></span><h2>Bathroom</h2>
         <label class="toggle"><input type="checkbox" checked><span></span></label></div>
-      <div class="row"><span class="icon thermo"></span><span class="value">22.3&nbsp;°C</span><span class="muted">Humidity 52&nbsp;%</span></div>
+      <div class="row"><span class="icon thermo"></span><span class="value" id="temp-4">22.3&nbsp;°C</span><span class="muted">Humidity 52&nbsp;%</span></div>
       <div class="bar"><div style="width:74%"></div></div>
       <div class="row small"><span>Brightness</span><span class="muted">74&nbsp;%</span></div>
     </section>
     <section class="card" id="card-5">
       <div class="card-head"><span class="icon bulb"></span><h2>Hallway</h2>
         <label class="toggle"><input type="checkbox"><span></span></label></div>
-      <div class="row"><span class="icon thermo"></span><span class="value">23.0&nbsp;°C</span><span class="muted">Humidity 55&nbsp;%</span></div>
+      <div class="row"><span class="icon thermo"></span><span class="value" id="temp-5">23.0&nbsp;°C</span><span class="muted">Humidity 55&nbsp;%</span></div>
       <div class="bar"><div style="width:85%"></div></div>
       <div class="row small"><span>Brightness</span><span class="muted">85&nbsp;%</span></div>
     </section>
   </div>
   <aside>
     <div class="panel weather"><div class="sun"></div><div><div class="temp">21&nbsp;°C</div><div class="muted">Partly cloudy · wind 12&nbsp;km/h</div></div></div>
-    <div class="panel"><h3>Status</h3><ul class="entities"><li><span class="dot ok"></span><span class="name">Front door</span><span class="state">Locked</span></li><li><span class="dot ok"></span><span class="name">Garage door</span><span class="state">Closed</span></li><li><span class="dot warn"></span><span class="name">Washing machine</span><span class="state">Running · 23 min</span></li><li><span class="dot alert"></span><span class="name">Back window</span><span class="state">Open</span></li><li><span class="dot ok"></span><span class="name">Robot vacuum</span><span class="state">Docked</span></li><li><span class="dot ok"></span><span class="name">Mailbox</span><span class="state">Empty</span></li></ul></div>
+    <div class="panel"><h3>Status</h3><ul class="entities" id="status"><li><span class="dot ok"></span><span class="name">Front door</span><span class="state">Locked</span></li><li><span class="dot ok"></span><span class="name">Garage door</span><span class="state">Closed</span></li><li><span class="dot warn"></span><span class="name">Washing machine</span><span class="state">Running · 23 min</span></li><li><span class="dot alert"></span><span class="name">Back window</span><span class="state">Open</span></li><li><span class="dot ok"></span><span class="name">Robot vacuum</span><span class="state">Docked</span></li><li><span class="dot ok"></span><span class="name">Mailbox</span><span class="state">Empty</span></li></ul></div>
     <div class="panel"><h3>Energy this week (kWh)</h3><div class="chart"><div class="col" style="height:62%"><span>M</span></div><div class="col" style="height:48%"><span>T</span></div><div class="col" style="height:75%"><span>W</span></div><div class="col" style="height:55%"><span>T</span></div><div class="col" style="height:90%"><span>F</span></div><div class="col" style="height:40%"><span>S</span></div><div class="col" style="height:66%"><span>S</span></div></div></div>
   </aside>
 </main>
