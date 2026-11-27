@@ -37,3 +37,55 @@ jobs:
           python-version: "3.12"
       - run: pip install pyyaml
       - run: python design-skills/skills/tech-tree/scripts/check.py --config tech-tree.yaml
+
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      s3: ${{ steps.f.outputs.s3 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: f
+        with:
+          filters: |
+            s3:
+              - 'docker/s3*'
+              - 'boards/s3-*/**'
+              - 'scripts/qemu*'
+              - '.github/workflows/ci.yml'
+
+  qemu-s3:
+    needs: changes
+    if: needs.changes.outputs.s3 == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: docker
+          file: docker/s3.Dockerfile
+          tags: eb-s3:dev
+          load: true
+          cache-from: type=gha,scope=eb-s3
+          cache-to: type=gha,scope=eb-s3,mode=max
+      # ESP-IDF checkout/tools, cargo registry and target dir live in the container's /cache.
+      - uses: actions/cache@v4
+        with:
+          path: .cache/eb-s3
+          key: eb-s3-${{ hashFiles('boards/s3-qemu-test/Cargo.toml', 'boards/s3-qemu-test/Cargo.lock', 'boards/s3-qemu-test/sdkconfig.defaults', 'docker/s3.Dockerfile') }}
+          restore-keys: eb-s3-
+      - name: Build firmware, boot in QEMU, compare screenshot
+        run: |
+          mkdir -p .cache/eb-s3 && chmod 777 .cache/eb-s3
+          sudo chown -R 1000:1000 .cache/eb-s3
+          EB_S3_CACHE="$PWD/.cache/eb-s3" scripts/qemu-s3-screenshot.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qemu-s3
+          path: |
+            out/qemu-s3/screen.png
+            out/qemu-s3/diff.png
+            out/qemu-s3/serial.log

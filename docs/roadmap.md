@@ -167,7 +167,6 @@ flowchart TB
 | J3 remote browser mode | ⏸ parked | Show Home Assistant by streaming a real browser running on a server. This bypasses our renderer. |
 | J4 auto local or remote mode | ⏸ parked | Pick local or remote rendering for each site automatically. |
 | Workspace skeleton | ✔ done · unrated | Empty Cargo workspace, ADRs 0001-0006, this roadmap and a first CI workflow. |
-| Check ESP32 emulation options | ○ next | See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3. |
 <!-- END GENERATED: plain-words -->
 
 ## Ready now
@@ -182,7 +181,6 @@ flowchart TB
 **docker**
 
 - `eng-blitz-builds-esp`: Blitz builds for ESP32 targets
-- `ci-emulation-check`: Check ESP32 emulation options
 <!-- END GENERATED: ready-now -->
 
 ## Running
@@ -215,8 +213,9 @@ Generated on 2026-11-27.
 ## Done, by month
 
 <!-- BEGIN GENERATED: done-by-month -->
-<details><summary><b>Nov 2026</b>: 7 done</summary>
+<details><summary><b>Nov 2026</b>: 8 done</summary>
 
+- `ci-emulation-check`: Check ESP32 emulation options (✔ done · unrated). See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3.
 - `ci-workspace-skeleton`: Workspace skeleton (✔ done · unrated). Empty Cargo workspace, ADRs 0001-0006, this roadmap and a first CI workflow.
 - `doc-corpus-choice`: Choose the test page corpus (✔ done · n/a). Test pages are Home Assistant-like, server-rendered sites and a simple custom dashboard.
 - `doc-name-embedded-browser`: Name the project (✔ done · n/a). The owner chose the name embedded-browser.
@@ -236,6 +235,6 @@ Each track has its own page with its tree, node table and per-node details.
 - [eng - engine](roadmap/tracks/eng.md): 8 nodes (1 done, 3 next, 3 blocked, 1 parked)
 - [plat - platform](roadmap/tracks/plat.md): 5 nodes (1 done, 4 blocked)
 - [js - JavaScript](roadmap/tracks/js.md): 6 nodes (1 done, 1 next, 4 parked)
-- [ci - build and test](roadmap/tracks/ci.md): 2 nodes (1 done, 1 next)
+- [ci - build and test](roadmap/tracks/ci.md): 2 nodes (2 done)
 - [doc - documentation](roadmap/tracks/doc.md): 3 nodes (3 done)
 <!-- END GENERATED: tracks -->

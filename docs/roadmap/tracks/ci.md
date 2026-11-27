@@ -10,7 +10,7 @@ Scope: Docker, emulation, CI, measurement tools.
 ```mermaid
 flowchart TB
     ci_workspace_skeleton["✔ Workspace skeleton"]
-    ci_emulation_check[/"○ Check ESP32<br/>emulation options"/]
+    ci_emulation_check[/"✔ Check ESP32<br/>emulation options"/]
     ci_workspace_skeleton ~~~ ci_emulation_check
     ci_workspace_skeleton --> ci_emulation_check
     classDef vsucc fill:#2e9e4f,stroke:#1b6b34,color:#fff
@@ -27,8 +27,7 @@ flowchart TB
     classDef decided fill:#ece0f7,stroke:#7b3fb5,stroke-dasharray:2 2,color:#111
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
-    class ci_workspace_skeleton unrated
-    class ci_emulation_check next
+    class ci_workspace_skeleton,ci_emulation_check unrated
 ```
 <!-- END GENERATED: track-ci -->
 
@@ -38,12 +37,12 @@ flowchart TB
 | id | title | kind | lane | state | outcome | start | end | depends_on | replaced_by | qualified_by | headline | evidence |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `ci-workspace-skeleton` | Workspace skeleton | tooling | host | done | unrated | 2026-11-27 | 2026-11-27 |  |  |  |  | initial commit |
-| `ci-emulation-check` | Check ESP32 emulation options | experiment | docker | next | unrated |  |  | ci-workspace-skeleton |  |  |  |  |
+| `ci-emulation-check` | Check ESP32 emulation options | experiment | docker | done | unrated | 2026-11-27 | 2026-11-27 | ci-workspace-skeleton |  |  | S3 QEMU boots with octal PSRAM and matches a golden screenshot; P4 boots a C hello world in QEMU 9.2.2 (no display); touch is not emulated in QEMU | docs/m0/emulation-results.md; scripts/qemu-s3-screenshot.sh; boards/s3-qemu-test |
 
 ### Details per node
 
 | id | title | verdict | headline | in plain words | notes | confirmed | waiting on | queue order | order reason |
 |---|---|---|---|---|---|---|---|---|---|
 | `ci-workspace-skeleton` | Workspace skeleton |  |  | Empty Cargo workspace, ADRs 0001-0006, this roadmap and a first CI workflow. |  |  |  |  |  |
-| `ci-emulation-check` | Check ESP32 emulation options |  |  | See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3. | Done when: the P4 is tried in QEMU 9.2.2 and Wokwi beta with the result recorded, and an S3 QEMU test pattern with screendump works as fallback. |  |  |  |  |
+| `ci-emulation-check` | Check ESP32 emulation options |  | S3 QEMU boots with octal PSRAM and matches a golden screenshot; P4 boots a C hello world in QEMU 9.2.2 (no display); touch is not emulated in QEMU | See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3. | Done when: the P4 is tried in QEMU 9.2.2 and Wokwi beta with the result recorded, and an S3 QEMU test pattern with screendump works as fallback. |  |  |  |  |
 <!-- END GENERATED: table-ci -->

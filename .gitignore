@@ -2,3 +2,4 @@
 .embuild/
 *.ppm
 testpages/fetched/
+/out/
