@@ -163,7 +163,7 @@ The S3 build is the same firmware, with nothing changed. Build details:
 - Image: `espressif/idf-rust:esp32s3_1.95.0.0` (esp toolchain 1.95.0.0).
 - ESP-IDF v5.5.5, fetched by esp-idf-sys.
 - `MCU=esp32s3`, `sdkconfig.defaults.esp32s3` (octal PSRAM, 80 MHz).
-- `targets/xtensa-esp32s3-espidf.json`, which is the esp toolchain's spec with `max-atomic-width` 64.
+- `targets/stock-atomics/xtensa-esp32s3-espidf.json`, which is the esp toolchain's spec with `max-atomic-width` 64. (Since ADR 0007 the default `targets/xtensa-esp32s3-espidf.json` is the software-atomics variant below.)
 
 **It builds and links.**
 
@@ -211,8 +211,8 @@ columns. No 4096 run exists for the P4.
 
 ## S3 software-atomics target
 
-The remedy if the H2 atomics check fails on S3 hardware. The spec is
-`boards/p4-function-ev/targets/soft-atomics/xtensa-esp32s3-espidf.json`: the S3 spec above plus `"features": "-s32c1i"`.
+The default S3 target since ADR 0007 (it was the remedy if the H2 atomics check fails; with `Arc`s in PSRAM it is expected to). The spec is
+`boards/p4-function-ev/targets/xtensa-esp32s3-espidf.json`: the stock-atomics spec (`targets/stock-atomics/`) plus `"features": "-s32c1i"`.
 It keeps the stem `xtensa-esp32s3-espidf`, so esp-idf-sys still sees the usual target name.
 
 - **How the S2 does it:** `xtensa-esp32s2-espidf` has `max-atomic-width` 32 and no `s32c1i` among its target features
@@ -222,7 +222,7 @@ It keeps the stem `xtensa-esp32s3-espidf`, so esp-idf-sys still sees the usual t
   builds C with `-mdisable-hardware-atomics` and implements the `__atomic_*_1/2/4` libcalls in
   `components/newlib/src/stdatomic.c`: S32C1I for internal RAM (`__atomic_s32c1i_*`), a spinlock for PSRAM addresses.
   So the libcalls Rust now emits take the PSRAM-safe path. The 64-bit ones are lock-based as before.
-- **It builds and links** (with the fearless_simd fix from the crash section, uncommitted): `__atomic_load_4`,
+- **It builds and links** (with the fearless_simd fork from the crash section): `__atomic_load_4`,
   `__atomic_fetch_add_4` and `__atomic_compare_exchange_4` resolve to ESP-IDF (in IRAM).
 - **No `s32c1i` left in Rust code.** A plain match on the objdump output gives 2,776 (stock) and 258 (soft), but about
   245 of those in each image are data decoded as code (literal pools, jump tables; a sampled hit sits right after
@@ -245,7 +245,7 @@ It keeps the stem `xtensa-esp32s3-espidf`, so esp-idf-sys still sees the usual t
 
 ```sh
 # Software-atomics S3 build (same command as the S3 build above, with the other spec)
-... -e TOOLCHAIN=+esp -e CHIP=esp32s3 -e TARGET=targets/soft-atomics/xtensa-esp32s3-espidf.json ...
+... -e TOOLCHAIN=+esp -e CHIP=esp32s3 -e TARGET=targets/stock-atomics/xtensa-esp32s3-espidf.json ...
 # Real CAS sites per function (awk script: s32c1i within 8 instructions after scompare1 is written)
 xtensa-esp32s3-elf-objdump -d --no-show-raw-insn firmware.elf | awk '
   /^[0-9a-f]+ </ {f=$2; n=99; next} /scompare1/ {n=0; next}
@@ -260,7 +260,7 @@ Every deviation from the stock toolchain and crates:
    - memmap2's unix backend needs `mmap`, which ESP-IDF's libc doesn't have, so the build fails with about 34 errors.
    - fontique only calls `Mmap::map(&File)` to load font files. The stand-in reads the file into memory, which still works for fonts on an SD card later.
    - Upstream fix: memmap2 could treat `target_os = "espidf"` like its stub backend, or fontique could make memmap2 optional separately from `std`.
-2. **`targets/*.json`**: the 64-bit atomics target specs described above, plus the opt-in S3 software-atomics spec `targets/soft-atomics/`. They need `-Zjson-target-spec`.
+2. **`targets/*.json`**: the 64-bit atomics target specs described above, with the S3 default being the software-atomics spec; the stock-atomics S3 spec is opt-in (`targets/stock-atomics/`). They need `-Zjson-target-spec`.
 3. **Nightly pinned to `nightly-2026-10-19`.**
    - Newer nightlies can't build `std` for ESP-IDF. libc 0.2.191 renamed the `stat` time fields that `std::os::espidf::fs` reads, so you get `no field st_mtime` (rust-lang/rust#164555).
    - esp-rs/esp-idf CI pins the same nightly for the same reason.
@@ -360,7 +360,7 @@ scripts/size-gate.sh p4-function-ev out/p4-function-ev-esp32p4/app.bin
 docker run --rm eb-p4-build rustc --print cfg --target riscv32imafc-esp-espidf | grep atomic
 docker run --rm espressif/idf-rust:esp32s3_1.95.0.0 rustc +esp --print cfg --target xtensa-esp32s3-espidf | grep atomic
 
-# S3 compile-only (ESP-IDF fetched by esp-idf-sys into the eb-p4-s3-espressif volume)
+# S3 compile-only, software-atomics target (ADR 0007; ESP-IDF fetched by esp-idf-sys into the eb-p4-s3-espressif volume)
 MSYS_NO_PATHCONV=1 docker run --rm -u root -e HOME=/home/esp -v "$(pwd -W):/repo" \
   -v eb-p4-s3-espressif:/home/esp/.espressif -v eb-p4-s3-registry:/home/esp/.cargo/registry \
   -v eb-p4-s3-target:/tmp/eb-target -e ESP_IDF_TOOLS_INSTALL_DIR=global \

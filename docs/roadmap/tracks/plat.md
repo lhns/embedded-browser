@@ -10,7 +10,7 @@ Scope: ESP adapters and board firmware.
 ```mermaid
 flowchart TB
     plat_boards_p4_first{{"✔ ESP32-P4 first, then<br/>S3"}}
-    plat_defect_s3_paint_crash>"⚠ S3 crash in first<br/>paint"]
+    plat_defect_s3_paint_crash>"✔ S3 crash in first<br/>paint"]
     plat_h1_p4_gate[/"⛔ H1 ESP32-P4 hardware<br/>gate"/]
     plat_h2_s3_gate[/"⛔ H2 ESP32-S3 hardware<br/>gate"/]
     plat_m2_p4_firmware["⛔ M2 P4 firmware"]
@@ -37,7 +37,7 @@ flowchart TB
     classDef finding fill:#ffe0b2,stroke:#d84315,stroke-width:2px,color:#111
     classDef waiting fill:#e3f2fd,stroke:#1f6fc5,stroke-dasharray:5 5,color:#111
     class plat_boards_p4_first decided
-    class plat_defect_s3_paint_crash finding
+    class plat_defect_s3_paint_crash succ
     class plat_h1_p4_gate,plat_h2_s3_gate,plat_m2_p4_firmware,plat_m3_s3_firmware blocked
 ```
 <!-- END GENERATED: track-plat -->
@@ -52,7 +52,7 @@ flowchart TB
 | `plat-h2-s3-gate` | H2 ESP32-S3 hardware gate | experiment | hardware | blocked | unrated |  |  | eng-blitz-builds-esp |  |  |  |  |
 | `plat-m2-p4-firmware` | M2 P4 firmware | feature | hardware | blocked | unrated |  |  | plat-h1-p4-gate, eng-m1-side-by-side-review, eng-m1-touch-events-forms, eng-m1-scroll-strip-cache |  |  |  |  |
 | `plat-m3-s3-firmware` | M3 S3 firmware | feature | hardware | blocked | unrated |  |  | plat-h2-s3-gate, eng-m1-side-by-side-review, eng-m1-touch-events-forms, eng-m1-scroll-strip-cache |  |  |  |  |
-| `plat-defect-s3-paint-crash` | S3 crash in first paint | defect | docker | in-progress | unrated | 2026-11-27 |  | eng-blitz-builds-esp |  |  |  | docs/m0/emulation-results.md; docs/m0/esp-build-results.md |
+| `plat-defect-s3-paint-crash` | S3 crash in first paint | defect | docker | done | unrated | 2026-11-27 | 2026-11-28 | eng-blitz-builds-esp |  |  |  | https://github.com/lhns/embedded-browser/pull/11; https://github.com/lhns/fearless_simd/tree/xtensa-align16; docs/m0/emulation-results.md; docs/adr/0007-xtensa-fork-and-soft-atomics.md |
 
 ### Details per node
 
@@ -63,5 +63,5 @@ flowchart TB
 | `plat-h2-s3-gate` | H2 ESP32-S3 hardware gate |  |  | Once an S3 board arrives, check that atomics in external memory work and repeat the speed tests. | Done when: a tiny firmware exercising Arc and atomics in PSRAM passes on an S3, and the H1 metrics are measured at 800x480. Run by the owner. |  |  |  |  |
 | `plat-m2-p4-firmware` | M2 P4 firmware |  |  | Browser firmware for the ESP32-P4 board with display, touch, Wi-Fi and HTTPS. | Done when: Wikipedia renders on the P4 hardware and scrolls by touch (DSI, GT911, Wi-Fi via esp-hosted on the C6, HTTPS). |  |  |  |  |
 | `plat-m3-s3-firmware` | M3 S3 firmware |  |  | Browser firmware for the two ESP32-S3 boards. | Done when: pages render and scroll by touch on the S3-BOX-3 (SPI) and then the 7-inch RGB board. If H2 fails on atomics, the S3 uses a software-atomics target spec (any Rust Arc or Mutex in PSRAM is affected, whatever the engine). |  |  |  |  |
-| `plat-defect-s3-paint-crash` | S3 crash in first paint |  |  | On the emulated S3, hello-Blitz parses, styles and lays out the page, then crashes in vello_cpu's alpha compositing on the first paint. | Done when: the cause (QEMU artefact or real Xtensa bug) is known with evidence, and fixed or worked around so the S3 QEMU hello-Blitz run prints its paint phase. Cause found (2026-11-28): an Xtensa LLVM bug (espressif/llvm-project#140, open). Frames with locals aligned above 16 realign SP with a plain add after entry and then read stack arguments from the moved SP. fearless_simd's align(32/64) vector types trigger it in 4 vello_cpu functions, and indexed_fill passed a garbage alphas pointer. Not QEMU, not the heap. Capping fearless_simd's alignment to 16 on Xtensa, tested via an uncommitted patch, gives 0 realigning functions and a full S3 QEMU run with the host checksum. Open: our fearless_simd fork with that change. Same PR: malloc threshold 4096 -> 256 with a 96 KB internal reserve, the P4 QEMU hello-Blitz run, icount timing, and the S3 software-atomics target. |  |  |  |  |
+| `plat-defect-s3-paint-crash` | S3 crash in first paint |  |  | The S3 crashed in the first paint because of a compiler bug triggered by 32- and 64-byte aligned SIMD types; our fearless_simd fork caps them at 16 and the S3 QEMU run now finishes with the host's checksum. | Done 2026-11-28. Cause: an Xtensa LLVM bug (espressif/llvm-project#140, open). Frames with locals aligned above 16 realign SP with a plain add after entry and then read stack arguments from the moved SP; fearless_simd's align(32/64) vector types trigger it in 4 vello_cpu functions. Not QEMU, not the heap. Fix: our fork lhns/fearless_simd, branch xtensa-align16 (patch f7044ee on the 1.3.0 release commit 2ac6acd), pinned by boards/p4-function-ev/Cargo.toml; nothing filed upstream (ADR 0007). Result: 0 realigning functions (scripts/scan-xtensa-realign.py) and the S3 QEMU hello-Blitz runs to eb-hello: done, checksum a144357b, identical to host and P4. CI (qemu-s3) builds, scans and boots it. Same work: malloc threshold 4096 -> 256 with a 96 KB internal reserve, the P4 QEMU hello-Blitz run, icount timing, and the S3 software-atomics target, now the S3 default. |  |  |  |  |
 <!-- END GENERATED: table-plat -->

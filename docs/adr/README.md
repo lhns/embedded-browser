@@ -10,3 +10,4 @@ Accepted ADRs are never edited, only superseded by a new one.
 | [0004](0004-js-hybrid-strategy.md) | Hybrid JavaScript strategy | Proposed |
 | [0005](0005-licensing.md) | Licensing and corpus policy | Accepted |
 | [0006](0006-build-in-docker.md) | Build firmware in Docker | Accepted |
+| [0007](0007-xtensa-fork-and-soft-atomics.md) | Xtensa: fearless_simd fork and software atomics | Accepted |
