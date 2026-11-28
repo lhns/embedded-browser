@@ -285,7 +285,87 @@ def links():
 """
 
 
-for name, fn in [("dashboard.html", dashboard), ("article.html", article), ("links.html", links)]:
+def bigpage():
+    """Heap-gate stress page: ~200 KB stylesheet, ~2.5k DOM nodes (this engine spends about as much heap per node here as on a 6k-node
+    Wikipedia article), infoboxes, tables and 1.8 MB of decoded images. Sized to peak near 11 MB under the 12 MB gate; the file must stay under the 2 MB document limit."""
+    rnd = random.Random(7)
+    imgs = []
+    for k in range(6):
+        sx, sy = 3 + k, 5 + k * 2
+        imgs.append(data_uri(png(300, 250, lambda x, y, k=k, sx=sx, sy=sy: (
+            (x // 3 * sx + y // 2) % 256, (y // 3 * sy + k * 30) % 256,
+            ((x // 5 ^ y // 5) * 9 + k * 40) % 256))))
+    rules = []
+    props = ["margin", "padding", "color", "background-color", "border", "font-size", "line-height", "text-align"]
+    vals = {"margin": ["0", "2px 4px", "0 0 .5em"], "padding": ["1px", "2px 6px", "0 4px"],
+            "color": ["#202122", "#0645ad", "#54595d", "#72777d"], "background-color": ["#fff", "#f8f9fa", "#eaecf0", "#fef6e7"],
+            "border": ["1px solid #a2a9b1", "0", "1px dotted #c8ccd1"], "font-size": ["12px", "13px", "14px", "95%"],
+            "line-height": ["1.2", "1.4", "1.6"], "text-align": ["left", "center", "right"]}
+    n = 0
+    while sum(len(r) for r in rules) < 200_000:
+        sel = rnd.choice(["div", "table", "td", "th", "li", "p", "span", "a", "ul"])
+        cls = f".c{n % 900}" if n % 3 else f".mw-{rnd.choice(WORDS).replace(' ', '-')}-{n % 400}"
+        ctx = rnd.choice(["#content ", "#content .box ", "body ", ".infobox ", ".wikitable ", ""])
+        decl = "; ".join(f"{p}: {rnd.choice(vals[p])}" for p in rnd.sample(props, 3))
+        rules.append(f"{ctx}{sel}{cls} {{ {decl}; }}\n")
+        n += 1
+    css = "".join(rules)
+
+    def infobox(i):
+        rows = "".join(f'<tr><th>{rnd.choice(WORDS).title()}</th><td class="c{rnd.randint(0, 899)}">{rnd.randint(100, 99999):,}</td></tr>'
+                       for _ in range(10))
+        return (f'<table class="infobox"><tr><th colspan="2" class="ib-title">Place {i}</th></tr>'
+                f'<tr><td colspan="2"><img src="{imgs[i // 4]}" width="240" height="200" alt=""></td></tr>{rows}</table>')
+
+    NLI, WRAP = 6, 4
+    sections = []
+    for si in range(24):
+        body = [infobox(si)] if si % 4 == 0 else []
+        for _ in range(3):
+            body.append(f'<p class="c{rnd.randint(0, 899)}">{para(3)} <a href="#s{si}">{rnd.choice(WORDS)}</a><sup>[{si}]</sup></p>')
+        if si % 3 == 1:
+            body.append(f'<figure class="thumb tleft"><div class="ph"></div><figcaption>{sentence()}</figcaption></figure>')
+        if si % 6 == 2:
+            rows = "".join("<tr>" + "".join(f'<td class="c{rnd.randint(0, 899)}">{rnd.randint(1, 9999)}</td>' for _ in range(6)) + "</tr>"
+                           for _ in range(6))
+            body.append(f'<table class="wikitable"><tr>{"".join(f"<th>H{j}</th>" for j in range(6))}</tr>{rows}</table>')
+        body.append("<ul>" + "".join(f'<li class="c{rnd.randint(0, 899)}">' + "".join(f'<span class="c{rnd.randint(0, 899)}">' for _ in range(WRAP)) + f'<a href="#">{rnd.choice(WORDS).title()}</a>' + "</span>" * WRAP + f' {rnd.choice(WORDS)}</li>' for _ in range(NLI)) + "</ul>")
+        sections.append(f'<h2 id="s{si}">Section {si + 1}</h2>\n' + "\n".join(body))
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1024, initial-scale=1">
+<title>Wikipedia-scale page</title>
+<!-- Synthetic heap-gate page: generated text, patterns and rules only. -->
+<style>
+  body {{ margin: 0; font-family: sans-serif; color: #202122; background: #f6f6f6; font-size: 14px; line-height: 1.6; }}
+  #content {{ background: white; margin: 0 0 0 20px; padding: 16px 24px; }}
+  h1 {{ font-family: serif; font-weight: normal; font-size: 28px; border-bottom: 1px solid #a2a9b1; margin: 0 0 4px; }}
+  h2 {{ font-family: serif; font-weight: normal; font-size: 21px; border-bottom: 1px solid #a2a9b1; margin: 18px 0 6px; clear: both; }}
+  a {{ color: #0645ad; }}
+  .infobox {{ float: right; width: 260px; margin: 0 0 12px 16px; border: 1px solid #a2a9b1; background: #f8f9fa; font-size: 12px; border-collapse: collapse; }}
+  .infobox th, .infobox td {{ text-align: left; padding: 2px 4px; vertical-align: top; }}
+  .wikitable {{ border-collapse: collapse; margin: 8px 0; }}
+  .wikitable th, .wikitable td {{ border: 1px solid #a2a9b1; padding: 2px 6px; }}
+  .wikitable th {{ background: #eaecf0; }}
+  .thumb {{ margin: 4px 12px 8px 0; border: 1px solid #c8ccd1; background: #f8f9fa; padding: 3px; font-size: 11px; width: 156px; }}
+  .tleft {{ float: left; }}
+  .ph {{ width: 150px; height: 125px; background: #c8ccd1; }}
+  .thumb img {{ display: block; }}
+{css}</style>
+</head>
+<body>
+<div id="content">
+<h1>Wikipedia-scale page</h1>
+{"".join(sections)}
+</div>
+</body>
+</html>
+"""
+
+
+for name, fn in [("dashboard.html", dashboard), ("article.html", article), ("links.html", links), ("bigpage.html", bigpage)]:
     with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as f:
         f.write(fn())
     print(name, os.path.getsize(os.path.join(OUT, name)))

@@ -126,3 +126,8 @@ fn article() {
 fn links() {
     check("links");
 }
+
+#[test]
+fn bigpage() {
+    check("bigpage");
+}
