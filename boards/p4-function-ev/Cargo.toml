@@ -59,3 +59,7 @@ opt-level = "s"
 # ESP-IDF has no mmap; see boards/patches/memmap2/Cargo.toml.
 [patch.crates-io]
 memmap2 = { path = "../patches/memmap2" }
+
+# Our fork: caps fearless_simd's vector alignment at 16 on Xtensa, working around an LLVM stack-realignment
+# bug that crashes vello_cpu on the S3 (ADR 0002, docs/m0/emulation-results.md). No effect on the P4.
+fearless_simd = { git = "https://github.com/lhns/fearless_simd", rev = "f7044ee879ad754aa93cac9fa90b3b3b99e49279" }

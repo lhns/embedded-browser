@@ -10,7 +10,7 @@
   "llvm-target": "xtensa-none-elf",
   "max-atomic-width": 64,
   "metadata": {
-    "description": "Xtensa ESP32-S3 ESP-IDF (stock xtensa-esp32s3-espidf of the esp toolchain with 64-bit atomics as ESP-IDF libcalls; 32-bit atomics stay inline S32C1I, unsafe on PSRAM)",
+    "description": "Xtensa ESP32-S3 ESP-IDF, software atomics: the stock spec with S32C1I disabled, so LLVM lowers every atomic to an __atomic_* libcall. ESP-IDF implements them with S32C1I for internal RAM and a lock for PSRAM, where S32C1I does not work (STDATOMIC_S32C1I_SPIRAM_WORKAROUND); 64-bit atomics as in the parent spec",
     "host_tools": false,
     "std": true,
     "tier": 3
@@ -22,5 +22,6 @@
     "unix"
   ],
   "target-pointer-width": 32,
-  "vendor": "espressif"
+  "vendor": "espressif",
+  "features": "-s32c1i"
 }

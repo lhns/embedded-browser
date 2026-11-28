@@ -95,7 +95,7 @@ Guru Meditation Error: Core  0 panic'ed (LoadProhibited).   PC 0x4247eb25  EXCVA
 - **Heap:** internal RAM was at 446 of 457 KB after style+layout; PSRAM held only 650 KB. With `SPIRAM_MALLOC_ALWAYSINTERNAL=4096`, Stylo's many small allocations fill internal RAM, which leaves no room for Wi-Fi and DMA buffers on a real S3. This holds whatever caused the crash; lowering the threshold is a thing to try on hardware.
 - **Atomics check:** `atomics OK` at `0x3c6109a0`. That address is past the end of the flash-mapped rodata segment (`3c4d0020` + 1,275,744 bytes), so the block is in PSRAM. **QEMU does not model the S32C1I-on-PSRAM hardware limitation, so the pass proves nothing about real S3 hardware** (see the S32C1I section in `docs/m0/esp-build-results.md`). It does show the software path (2 threads, `Arc`, 64-bit libcall atomics) runs.
 - Threads: `tasks` was 6 from engine start through style+layout.
-- **Script status:** `scripts/qemu-s3-hello-blitz.sh [build-out-dir]` runs the flow and exits 1 at the paint crash. It exits 0 once the firmware prints `eb-hello: done`.
+- **Script status:** `scripts/qemu-s3-hello-blitz.sh [build-out-dir]` exits 0 once the firmware prints `eb-hello: done`. It exited 1 at the paint crash until the fearless_simd fork (below) was in.
 
 ## S3 paint crash: cause and fix
 
@@ -142,7 +142,7 @@ The whole old S3 image has exactly 4 realigning functions (`scripts/scan-xtensa-
 fearless_simd `Fallback`: `Fine::indexed_fill` (frame 0x9e0), `lowp::blend::mix` (0x420), `GradientPainter::new`
 (0x120) and `GradientPainter::paint_u8` (0x2a0). Stylo, std and the rest have none.
 
-### Fix: cap fearless_simd's alignment to 16 on Xtensa (needs our fork)
+### Fix: cap fearless_simd's alignment to 16 on Xtensa (our fork)
 In fearless_simd, every `#[repr(C, align(32))]` and `#[repr(C, align(64))]` becomes
 ```rust
 #[cfg_attr(not(target_arch = "xtensa"), repr(C, align(32)))]   // resp. align(64)
@@ -153,7 +153,14 @@ same change) and `src/support.rs` (`Aligned256`, `Aligned512`, `Compact32StitchC
 only alignment checks are `const` asserts that a cast's source is at least as aligned as its target, which still hold
 when everything is 16. The `Fallback` level is plain arrays, so nothing needs more than natural alignment.
 
-Validated with an uncommitted copy of fearless_simd 1.3.0 under `[patch.crates-io]`, made with
+Done in our fork, [lhns/fearless_simd](https://github.com/lhns/fearless_simd), branch `xtensa-align16`: commit
+`f7044ee879ad754aa93cac9fa90b3b3b99e49279` on `2ac6acdd13efb7689a6e80049a4933516a57ec20`, which is the commit crates.io's
+1.3.0 was published from (`.cargo_vcs_info.json` in the .crate; there is no v1.3.0 tag; `fearless_simd/` there is
+byte-identical to the .crate apart from the cargo-normalised `Cargo.toml`). The generator `fearless_simd_gen`
+(`mk_simd_types.rs`) emits the attributes for types over 16 bytes; regenerating changes only `simd_types.rs`.
+`boards/p4-function-ev/Cargo.toml` pins that revision under `[patch.crates-io]` (ADR 0007). Nothing is filed upstream.
+
+First validated with an uncommitted copy of fearless_simd 1.3.0 under `[patch.crates-io]`, made with
 ```sh
 for n in 32 64; do sed -i "s/^#\[repr(C, align($n))\]$/#[cfg_attr(not(target_arch = \"xtensa\"), repr(C, align($n)))]\n#[cfg_attr(target_arch = \"xtensa\", repr(C, align(16)))]/" \
   src/generated/simd_types.rs src/support.rs; done
@@ -177,8 +184,12 @@ eb-hello: frame 2457600 bytes at 0x3c6e165c, 439434 non-background pixels, check
 eb-hello: done
 ```
 
-The fix is not in this repo: per ADR 0002 it goes into our fork of fearless_simd (`[patch.crates-io]` at a fixed
-revision). Until then the S3 image still crashes at the first paint. Check any S3 image with:
+With the fork pinned in the board and the software-atomics spec as the S3 default (ADR 0007), a clean rebuild gives 0
+realigning functions and `eb-hello: done` with checksum `a144357b` (app image 6,323,584 bytes; atomics check 32.3 s,
+style+layout 4.4 s, cold paint 33.1 s, warm paint 21.4 s, wall clock under QEMU).
+
+The S3 build in this repo uses the fork, and CI (`qemu-s3`) builds it, runs the scan below and boots it to
+`eb-hello: done`. Check any S3 image with:
 
 ```sh
 xtensa-esp32s3-elf-objdump -d --no-show-raw-insn firmware.elf | python3 scripts/scan-xtensa-realign.py   # exit 1 if any

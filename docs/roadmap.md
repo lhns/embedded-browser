@@ -165,7 +165,6 @@ flowchart TB
 | H2 ESP32-S3 hardware gate | ⛔ blocked | Once an S3 board arrives, check that atomics in external memory work and repeat the speed tests. |
 | M2 P4 firmware | ⛔ blocked | Browser firmware for the ESP32-P4 board with display, touch, Wi-Fi and HTTPS. |
 | M3 S3 firmware | ⛔ blocked | Browser firmware for the two ESP32-S3 boards. |
-| S3 crash in first paint | ⚠ open | On the emulated S3, hello-Blitz parses, styles and lays out the page, then crashes in vello_cpu's alpha compositing on the first paint. |
 | No JavaScript in v1 | ✔ done · n/a | Version 1 renders pages without running scripts; JavaScript is a parallel track. |
 | J1 QuickJS on the P4 | ⏸ parked | Check that the QuickJS-ng JavaScript engine fits and runs fast enough on the P4. |
 | J2 minimal DOM and web APIs | ⏸ parked | Give scripts a small DOM and the web calls small dashboards use. |
@@ -212,7 +211,7 @@ Generated on 2026-11-28.
 ## Done, by month
 
 <!-- BEGIN GENERATED: done-by-month -->
-<details><summary><b>Nov 2026</b>: 14 done, 1 abandoned</summary>
+<details><summary><b>Nov 2026</b>: 15 done, 1 abandoned</summary>
 
 - `ci-emulation-check`: Check ESP32 emulation options (✔ done · mixed). See whether the P4 boots in QEMU or Wokwi; otherwise emulate only the S3.
 - `ci-workspace-skeleton`: Workspace skeleton (✔ done · unrated). Empty Cargo workspace, ADRs 0001-0006, this roadmap and a first CI workflow.
@@ -229,6 +228,7 @@ Generated on 2026-11-28.
 - `js-host-spike`: Run corpus scripts in QuickJS (✔ done · mixed). On the host, run the small corpus scripts in QuickJS-ng to learn how much memory and which web APIs they need.
 - `js-no-js-in-v1`: No JavaScript in v1 (✔ done · n/a). Version 1 renders pages without running scripts; JavaScript is a parallel track.
 - `plat-boards-p4-first`: ESP32-P4 first, then S3 (✔ done · n/a). The ESP32-P4 boards come first, then the two ESP32-S3 boards.
+- `plat-defect-s3-paint-crash`: S3 crash in first paint (✔ fixed). The S3 crashed in the first paint because of a compiler bug triggered by 32- and 64-byte aligned SIMD types; our fearless_simd fork caps them at 16 and the S3 QEMU run now finishes with the host's checksum.
 
 </details>
 <!-- END GENERATED: done-by-month -->
@@ -239,7 +239,7 @@ Generated on 2026-11-28.
 Each track has its own page with its tree, node table and per-node details.
 
 - [eng - engine](roadmap/tracks/eng.md): 14 nodes (6 done, 3 next, 1 blocked, 3 parked, 1 abandoned)
-- [plat - platform](roadmap/tracks/plat.md): 6 nodes (1 done, 1 in progress, 4 blocked)
+- [plat - platform](roadmap/tracks/plat.md): 6 nodes (2 done, 4 blocked)
 - [js - JavaScript](roadmap/tracks/js.md): 6 nodes (2 done, 4 parked)
 - [ci - build and test](roadmap/tracks/ci.md): 2 nodes (2 done)
 - [doc - documentation](roadmap/tracks/doc.md): 3 nodes (3 done)
