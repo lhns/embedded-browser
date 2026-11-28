@@ -1,4 +1,8 @@
+# Dependency policy, see docs/adr/0005-licensing.md. Run: cargo deny check
+# Covers the workspace only; the board crates have their own lockfiles.
+
 [licenses]
+# Exactly the list in ADR 0005. Do not add a licence here without superseding the ADR.
 allow = [
     "MIT",
     "Apache-2.0",
@@ -12,6 +16,12 @@ allow = [
     "OFL-1.1",
 ]
 confidence-threshold = 0.9
+# ring 0.17 declares "Apache-2.0 AND ISC" in its manifest, so it needs no clarify entry.
+
+[advisories]
+# Yanked crates fail; unmaintained advisories on transitive crates are reported only.
+yanked = "deny"
+unmaintained = "workspace"
 
 [bans]
 multiple-versions = "warn"
@@ -19,3 +29,5 @@ multiple-versions = "warn"
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

@@ -24,10 +24,11 @@ use engine::{H, Raster, W};
 #[global_allocator]
 static GLOBAL: Counting = Counting;
 
-const CORPUS: [&str; 3] = [
+const CORPUS: [&str; 4] = [
     "testpages/dashboard.html",
     "testpages/article.html",
     "testpages/links.html",
+    "testpages/bigpage.html",
 ];
 const BAND: u32 = 32;
 
