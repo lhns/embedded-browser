@@ -177,7 +177,81 @@ The S3 build is the same firmware, with nothing changed. Build details:
 - **Code split:** the same as on the P4, about 4% bigger. Stylo is 1503 KB of text, fonts and text 776 KB, std 724 KB, Blitz 432 KB, raster 414 KB, Taffy 282 KB.
 - **The attribution script's rodata column is wrong on Xtensa:** nm reports DROM symbols as data there. Only the text column is meaningful for the S3.
 - **This proves compile and link only.** The stock S3 target emits inline S32C1I for 32-bit atomics. `objdump -d` of the S3 ELF finds **2,787 `s32c1i` instructions, 2,764 of them in Rust functions** and 23 in ESP-IDF C. So `Arc` and `Mutex` on PSRAM-resident data are unsafe on the S3 hardware; see the doc lookups below.
-- **H2 should run this image's atomics check.** It tests exactly that case. If it fails, try a software-atomics target (esp-rs/esp-idf-sys#406) before calling the S3 a fallback-engine board.
+- **H2 should run this image's atomics check.** It tests exactly that case. If it fails, try a software-atomics target (esp-rs/esp-idf-sys#406) before calling the S3 a fallback-engine board. That target now exists, see [below](#s3-software-atomics-target).
+
+## Malloc threshold: 4096 -> 256 bytes
+
+Node `plat-defect-s3-paint-crash`, 2026-11-28. `sdkconfig.defaults` (shared by both chips) now has
+`CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=256` (was 4096) and `CONFIG_SPIRAM_MALLOC_RESERVE_INTERNAL=98304` (was 65536).
+With 4096, Stylo's many small allocations filled the S3's internal RAM before the first paint. Checked in the
+generated sdkconfig of both builds. Numbers are from the QEMU runs (`docs/m0/emulation-results.md`); the allocation
+pattern does not depend on the emulator.
+
+The printed internal figures include the `SPIRAM_MALLOC_RESERVE_INTERNAL` pool: `esp_psram_extram_reserve_dma_pool`
+mallocs it from internal RAM and registers it again as its own heap, so it counts in both "total" and "used". That
+explains the totals (457 - 64 = 489 - 96 = 393 KB). The table shows the printed values and, in brackets, the values net
+of the reserve, i.e. the ordinary internal heap that Stylo competes for:
+
+| After style+layout | Internal used / total | Internal peak | PSRAM used |
+|---|---|---|---|
+| S3, 4096, 64 KB reserve (before) | 446 / 457 KB (382 / 393) | 447 KB | 650 KB |
+| S3, 256, 96 KB reserve | 310 / 489 KB (214 / 393) | 405 KB (309) | 817 KB |
+| P4, 256 (QEMU, no reserve: PSRAM is added by hand) | 213 / 597 KB | 213 KB | 817 KB |
+
+During paint the S3 peaks at 431 of 489 KB internal (335 of 393 net, so 58 KB of the ordinary heap free plus the
+96 KB reserve), PSRAM 3.9-4.4 MB. The P4 peaks at 239 of 597 KB; on hardware, with a reserve, expect 96 KB more in both
+columns. No 4096 run exists for the P4.
+
+- **Most small allocations still stay internal.** About 170 KB moved to PSRAM, but allocations of 256 bytes or less
+  remain internal, and on the S3 the paint peak leaves about 60 KB of the ordinary heap. Next step if Wi-Fi does not
+  fit: threshold 0, so only the reserve and explicit `MALLOC_CAP_INTERNAL` requests use internal RAM.
+- **On the S3 this makes the software-atomics target close to mandatory on hardware.** Small `Arc`s (refcount 8 bytes
+  plus the value) of more than 256 bytes now go to PSRAM, and with threshold 0 all of them would. Inline S32C1I on
+  those is the S32C1I-on-PSRAM problem below.
+
+## S3 software-atomics target
+
+The remedy if the H2 atomics check fails on S3 hardware. The spec is
+`boards/p4-function-ev/targets/soft-atomics/xtensa-esp32s3-espidf.json`: the S3 spec above plus `"features": "-s32c1i"`.
+It keeps the stem `xtensa-esp32s3-espidf`, so esp-idf-sys still sees the usual target name.
+
+- **How the S2 does it:** `xtensa-esp32s2-espidf` has `max-atomic-width` 32 and no `s32c1i` among its target features
+  (`rustc +esp --print cfg`; the S2 core has no S32C1I). LLVM then lowers every atomic to an `__atomic_*` libcall, which
+  ESP-IDF implements. Turning the feature off on the S3 does the same (esp-rs/esp-idf-sys#406 proposes this).
+- **The C side:** with SPIRAM on the S3, ESP-IDF sets `CONFIG_STDATOMIC_S32C1I_SPIRAM_WORKAROUND=y` (in our sdkconfig),
+  builds C with `-mdisable-hardware-atomics` and implements the `__atomic_*_1/2/4` libcalls in
+  `components/newlib/src/stdatomic.c`: S32C1I for internal RAM (`__atomic_s32c1i_*`), a spinlock for PSRAM addresses.
+  So the libcalls Rust now emits take the PSRAM-safe path. The 64-bit ones are lock-based as before.
+- **It builds and links** (with the fearless_simd fix from the crash section, uncommitted): `__atomic_load_4`,
+  `__atomic_fetch_add_4` and `__atomic_compare_exchange_4` resolve to ESP-IDF (in IRAM).
+- **No `s32c1i` left in Rust code.** A plain match on the objdump output gives 2,776 (stock) and 258 (soft), but about
+  245 of those in each image are data decoded as code (literal pools, jump tables; a sampled hit sits right after
+  `.byte` lines and before an `ee.vmulas` that cannot occur there). Counting only real compare-and-swap sites, an
+  `s32c1i` within 8 instructions after a `wsr` to SCOMPARE1:
+
+  | | `s32c1i` sites | in Rust functions | in ESP-IDF C |
+  |---|---|---|---|
+  | stock spec | 2,533 | 2,530 | 3 |
+  | soft-atomics spec | 11 | **0** | 11 (the `__atomic_s32c1i_*` internal-RAM paths, `esp_cpu_compare_and_set`, coprocessor switch) |
+
+- **Size:** app image 6,323,600 bytes against 6,335,904 for the stock spec (-12 KB): `.flash.text` -13.8 KB, since a call
+  is shorter than an inline CAS loop; `.iram0.text` +1.5 KB.
+- **Speed (S3 QEMU, wall clock, back to back on the same host; noisy):** it runs to `eb-hello: done`, both paints, checksum
+  `a144357b`. The atomics check, which does nothing but atomics, took 29.3 s against 9.3 s (about 3x). The engine
+  phases are within the run-to-run noise: style+layout 1.7 s vs 2.7 s, cold paint 31.4 s vs 36.1 s, warm paint 47.0 s
+  vs 31.9 s. QEMU does not model the cost of a PSRAM spinlock or of cache misses, so this does not give the device cost.
+  The S3's `-icount` mode hangs right after the bootloader (`Disabling RNG early entropy source...`), so there is no
+  instruction count for the S3. H2 should time both specs on hardware.
+
+```sh
+# Software-atomics S3 build (same command as the S3 build above, with the other spec)
+... -e TOOLCHAIN=+esp -e CHIP=esp32s3 -e TARGET=targets/soft-atomics/xtensa-esp32s3-espidf.json ...
+# Real CAS sites per function (awk script: s32c1i within 8 instructions after scompare1 is written)
+xtensa-esp32s3-elf-objdump -d --no-show-raw-insn firmware.elf | awk '
+  /^[0-9a-f]+ </ {f=$2; n=99; next} /scompare1/ {n=0; next}
+  /\ts32c1i/ {if (n<8) {c[f]++; t++}; next} /:\t/ {n++}
+  END {print "real", t; for (k in c) print c[k], k}' | sort -rn | head
+```
 
 ## What is not stock
 Every deviation from the stock toolchain and crates:
@@ -186,7 +260,7 @@ Every deviation from the stock toolchain and crates:
    - memmap2's unix backend needs `mmap`, which ESP-IDF's libc doesn't have, so the build fails with about 34 errors.
    - fontique only calls `Mmap::map(&File)` to load font files. The stand-in reads the file into memory, which still works for fonts on an SD card later.
    - Upstream fix: memmap2 could treat `target_os = "espidf"` like its stub backend, or fontique could make memmap2 optional separately from `std`.
-2. **`targets/*.json`**: the 64-bit atomics target specs described above. They need `-Zjson-target-spec`.
+2. **`targets/*.json`**: the 64-bit atomics target specs described above, plus the opt-in S3 software-atomics spec `targets/soft-atomics/`. They need `-Zjson-target-spec`.
 3. **Nightly pinned to `nightly-2026-10-19`.**
    - Newer nightlies can't build `std` for ESP-IDF. libc 0.2.191 renamed the `stat` time fields that `std::os::espidf::fs` reads, so you get `no field st_mtime` (rust-lang/rust#164555).
    - esp-rs/esp-idf CI pins the same nightly for the same reason.

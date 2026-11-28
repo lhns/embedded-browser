@@ -17,6 +17,10 @@ harness = false
 # The feature set tools/measure used for the M0 heap numbers: `floats`, PNG/JPEG/GIF decoders
 # and the full Noto Sans regular+bold instead of the Latin subset. Used for the size re-check.
 measured-set = ["blitz-dom/floats", "dep:image", "dep:ttf-noto-sans"]
+# Emulator-only (P4 QEMU): QEMU's esp32p4 maps a PSRAM window but does not answer the PSRAM chip
+# probe, so boot continues without PSRAM (sdkconfig.defaults.qemu) and main() adds the window to
+# the heap itself. Never use it for hardware images.
+qemu = []
 
 [dependencies]
 # Blitz pinned as in ADR 0002, minimal features: no svg, woff, accessibility, system fonts,
