@@ -13,3 +13,4 @@ The repo is public, so committed pages are synthetic; real sites are fetched at 
 - `golden/` holds the engine's renders, checked with a tolerance by `cargo test -p embedded-browser --test golden` (`UPDATE_GOLDENS=1` rewrites them).
 - `reference/` holds headless Chromium screenshots for comparison (`scripts/reference-screenshots.sh`); see docs/m1/side-by-side.md.
 - `js/` belongs to the JS track.
+- `reference-servo/` holds headless Servo screenshots, a second reference (`scripts/servo-screenshots.sh`).
