@@ -6,7 +6,8 @@ handler (`_panic_handler` in riscv/vectors.S) reads the EXT_ILL CSR (0x7F0) to s
 instruction caused the trap. Espressif QEMU (esp-develop-9.2.2-20261109) sets that reason only for
 FP loads/stores and FP arithmetic, not for `csrr` of fflags/frm/fcsr. The ROM's soft-double
 routines read `frm`, so the first f64 operation in a task panics with "Illegal instruction"
-(MTVAL 0x00202973, `csrr s2, frm`). Silicon v3+ reports those CSR accesses as FPU use.
+(MTVAL 0x00202973, `csrr s2, frm`). Silicon v3+ is assumed to report those CSR
+accesses as FPU use (IDF's rev < 3 software decode counts them); not observed on hardware.
 
 The patch replaces `csrrw a0, 0x7f0, zero` with `li a0, 1` (reason = FPU) in the handler. A real
 illegal instruction then loops (FPU enabled, retried, trapped again) instead of panicking; the

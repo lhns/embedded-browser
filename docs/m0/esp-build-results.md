@@ -187,18 +187,24 @@ With 4096, Stylo's many small allocations filled the S3's internal RAM before th
 generated sdkconfig of both builds. Numbers are from the QEMU runs (`docs/m0/emulation-results.md`); the allocation
 pattern does not depend on the emulator.
 
+The printed internal figures include the `SPIRAM_MALLOC_RESERVE_INTERNAL` pool: `esp_psram_extram_reserve_dma_pool`
+mallocs it from internal RAM and registers it again as its own heap, so it counts in both "total" and "used". That
+explains the totals (457 - 64 = 489 - 96 = 393 KB). The table shows the printed values and, in brackets, the values net
+of the reserve, i.e. the ordinary internal heap that Stylo competes for:
+
 | After style+layout | Internal used / total | Internal peak | PSRAM used |
 |---|---|---|---|
-| S3, 4096 (before) | 446 / 457 KB | 447 KB | 650 KB |
-| S3, 256 | 310 / 489 KB | 405 KB | 817 KB |
-| P4, 256 | 213 / 597 KB | 213 KB | 817 KB |
+| S3, 4096, 64 KB reserve (before) | 446 / 457 KB (382 / 393) | 447 KB | 650 KB |
+| S3, 256, 96 KB reserve | 310 / 489 KB (214 / 393) | 405 KB (309) | 817 KB |
+| P4, 256 (QEMU, no reserve: PSRAM is added by hand) | 213 / 597 KB | 213 KB | 817 KB |
 
-During paint the S3 peaks at 431 of 489 KB internal (PSRAM 3.9-4.4 MB), the P4 at 239 of 597 KB. The internal total
-differs between the two S3 builds (457 vs 489 KB); I did not track down why. No 4096 run exists for the P4.
+During paint the S3 peaks at 431 of 489 KB internal (335 of 393 net, so 58 KB of the ordinary heap free plus the
+96 KB reserve), PSRAM 3.9-4.4 MB. The P4 peaks at 239 of 597 KB; on hardware, with a reserve, expect 96 KB more in both
+columns. No 4096 run exists for the P4.
 
-- **Most small allocations still stay internal.** About 140 KB moved to PSRAM, but allocations of 256 bytes or less
-  remain internal, and on the S3 the paint peak leaves only about 60 KB. Next step if Wi-Fi does not fit: threshold 0,
-  so only the reserve and explicit `MALLOC_CAP_INTERNAL` requests use internal RAM.
+- **Most small allocations still stay internal.** About 170 KB moved to PSRAM, but allocations of 256 bytes or less
+  remain internal, and on the S3 the paint peak leaves about 60 KB of the ordinary heap. Next step if Wi-Fi does not
+  fit: threshold 0, so only the reserve and explicit `MALLOC_CAP_INTERNAL` requests use internal RAM.
 - **On the S3 this makes the software-atomics target close to mandatory on hardware.** Small `Arc`s (refcount 8 bytes
   plus the value) of more than 256 bytes now go to PSRAM, and with threshold 0 all of them would. Inline S32C1I on
   those is the S32C1I-on-PSRAM problem below.
@@ -218,8 +224,10 @@ It keeps the stem `xtensa-esp32s3-espidf`, so esp-idf-sys still sees the usual t
   So the libcalls Rust now emits take the PSRAM-safe path. The 64-bit ones are lock-based as before.
 - **It builds and links** (with the fearless_simd fix from the crash section, uncommitted): `__atomic_load_4`,
   `__atomic_fetch_add_4` and `__atomic_compare_exchange_4` resolve to ESP-IDF (in IRAM).
-- **No `s32c1i` left in Rust code.** Counting only real compare-and-swap sites (an `s32c1i` within 8 instructions after
-  a `wsr` to SCOMPARE1; objdump also misdecodes about 245 literal-pool words as `s32c1i` in both images):
+- **No `s32c1i` left in Rust code.** A plain match on the objdump output gives 2,776 (stock) and 258 (soft), but about
+  245 of those in each image are data decoded as code (literal pools, jump tables; a sampled hit sits right after
+  `.byte` lines and before an `ee.vmulas` that cannot occur there). Counting only real compare-and-swap sites, an
+  `s32c1i` within 8 instructions after a `wsr` to SCOMPARE1:
 
   | | `s32c1i` sites | in Rust functions | in ESP-IDF C |
   |---|---|---|---|

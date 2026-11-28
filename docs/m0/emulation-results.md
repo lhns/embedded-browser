@@ -9,7 +9,7 @@ Date: 2026-11-27. Versions: Espressif QEMU `esp-develop-9.2.2-20261109`, `espres
 | | CI can emulate | Cannot |
 |---|---|---|
 | ESP32-S3 | Boot, octal PSRAM (8 MB), serial, RGB framebuffer screenshot (`screendump`) compared with a golden, Ethernet (open_eth). Good for: the rendering pipeline on Xtensa, PSRAM allocation, golden screenshots. | I2C (so no touch controller), GP SPI, I2S, LEDC, Wi-Fi, SAR ADC (see quirk 2), real timing. The panel is a QEMU-only virtual RGB device, not the BOX-3 SPI ILI9341. |
-| ESP32-P4 | Boots a plain IDF v5.5.5 C hello world in the pinned QEMU (`-machine esp32p4`, ROM `esp32p4-eco5`, chip rev v3.1, dual core 400 MHz). Runs the Rust hello-Blitz to the end (serial) with three emulator-only shims (PSRAM heap, lazy-FPU trap; see [Hello-Blitz on P4 QEMU](#hello-blitz-on-p4-qemu)). `-icount` gives deterministic instruction counts. Good for serial smoke tests and instruction-count timing. | The PSRAM chip probe (the window is RAM, the controller does not answer), MIPI-DSI, GT911/I2C. No display device is exposed in `-device help`. No screenshots. |
+| ESP32-P4 | Boots a plain IDF v5.5.5 C hello world in the pinned QEMU (`-machine esp32p4`, ROM `esp32p4-eco5`, chip rev v3.1, dual core 400 MHz). Runs the Rust hello-Blitz to the end (serial) with two emulator-only shims (PSRAM heap, lazy-FPU trap; see [Hello-Blitz on P4 QEMU](#hello-blitz-on-p4-qemu)). `-icount` gives deterministic instruction counts. Good for serial smoke tests and instruction-count timing. | The PSRAM chip probe (the window is RAM, the controller does not answer), MIPI-DSI, GT911/I2C. No display device is exposed in `-device help`. No screenshots. |
 
 So the S3 gets a golden-screenshot job; the P4 gets a serial smoke test (`scripts/qemu-p4-hello-blitz.sh`, not yet in CI).
 Touch cannot be emulated in QEMU for either chip. Wokwi is the only route to touch plus screenshot (cloud, token,
@@ -215,7 +215,8 @@ which now also carries `qemu-riscv32-softmmu` of the same release).
 **Result: all phases run, paint included, and the frame matches the host** (439,434 non-background pixels, checksum
 `a144357b`). So the S3 paint crash is Xtensa-specific (see [the cause](#s3-paint-crash-cause-and-fix)).
 
-It needs three emulator-only shims; none touches the hardware image:
+It needs two emulator-only shims; neither touches the hardware image (the hardware builds' generated sdkconfig has
+`# CONFIG_SPIRAM_IGNORE_NOTFOUND is not set`):
 1. **PSRAM.** QEMU maps a 64 MB plain-RAM window at `0x48000000` (`hw/misc/esp32p4_psram_mem.c`) but does not answer
    the hex-PSRAM chip probe, so IDF stops with `hex_psram: PSRAM chip is not connected` / `Failed to init external RAM!`.
    The `qemu` cargo feature plus `sdkconfig.defaults.qemu` (`CONFIG_SPIRAM_IGNORE_NOTFOUND=y`) boot on without it, and
@@ -226,7 +227,12 @@ It needs three emulator-only shims; none touches the hardware image:
    reads the EXT_ILL CSR (0x7F0) for an "FPU" reason. QEMU sets that reason for FP loads/stores and FP arithmetic
    only, not for `fflags`/`frm`/`fcsr` CSR accesses (`esp_cpu_insn_is_fpu` in `target/riscv/esp_cpu.c`).
    `scripts/qemu-patch-p4-fpu.py` patches the handler's `csrrw a0, 0x7f0, zero` into `li a0, 1`.
-3. The ADC constructor patch is not needed: `adc_hw_calibration` is not linked in the P4 image.
+   That silicon v3+ sets the FPU reason for these CSR accesses is inferred, not observed: IDF's software decode for
+   rev < 3 counts them as FPU use. **H1 watch item:** an `Illegal instruction` panic with MTVAL `0x00202973` on the
+   board means the hardware behaves like QEMU here, and then it is an IDF problem for us, not a QEMU one.
+
+The ADC constructor patch is not needed: `adc_hw_calibration` is not linked in the P4 image. (`qemu-patch-adc.py` has
+a RISC-V branch now, untested for that reason.)
 
 ```sh
 # Build (P4 image, same volumes as the hardware build; output in out/p4-function-ev-esp32p4/)
